@@ -15,6 +15,7 @@ public class Transaction {
   @JsonIgnore long userId;
   long cardNumber;
   int value;
+  int fee;
   Status status;
   LocalDateTime time;
 }

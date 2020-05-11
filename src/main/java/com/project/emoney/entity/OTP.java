@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class OTP {
   long id;
-  long userId;
+  String emailOrPhone;
   String code;
   LocalDateTime time;
 }
