@@ -12,10 +12,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Transaction {
   long id;
-  @JsonIgnore long userId;
+  long userId;
   String cardNumber;
-  int value;
-  int fee;
+  long value;
+  long fee;
   Status status;
   TransactionMethod method;
   LocalDateTime time;
