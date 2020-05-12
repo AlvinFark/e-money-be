@@ -12,7 +12,8 @@ public class User {
   long id;
   String name;
   String email;
-  @JsonIgnore String password;
+  String phone;
+  String password;
   long balance;
   boolean active;
 }
