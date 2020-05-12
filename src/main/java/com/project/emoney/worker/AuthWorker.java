@@ -1,6 +1,8 @@
 package com.project.emoney.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.emoney.entity.User;
+import com.project.emoney.mybatis.UserService;
 import com.project.emoney.payload.LoginRequest;
 import com.project.emoney.security.JwtTokenUtil;
 import com.project.emoney.security.JwtUserDetailsService;
@@ -26,6 +28,9 @@ public class AuthWorker {
 
   @Autowired
   private JwtUserDetailsService userDetailsService;
+
+  @Autowired
+  private UserService userService;
 
   @Autowired
   private JwtTokenUtil jwtTokenUtil;
@@ -64,8 +69,13 @@ public class AuthWorker {
         try {
           authenticate(loginRequest.getEmailOrPhone(), loginRequest.getPassword());
           final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
-          final String token = jwtTokenUtil.generateToken(userDetails);
-          response = token;
+          User user = userService.getUserByEmail(userDetails.getUsername());
+          if (user.isActive()){
+            final String token = jwtTokenUtil.generateToken(userDetails);
+            response = token;
+          } else {
+            response = "inactive account, check your email or resend email verification";
+          }
         } catch (Exception e) {
           response = "bad credentials";
         }
