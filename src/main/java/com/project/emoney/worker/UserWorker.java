@@ -1,41 +1,31 @@
 package com.project.emoney.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.emoney.entity.User;
+import com.project.emoney.mybatis.UserService;
 import com.project.emoney.payload.LoginRequest;
-import com.project.emoney.security.JwtTokenUtil;
-import com.project.emoney.security.JwtUserDetailsService;
 import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 
 @Service
-public class AuthWorker {
+public class UserWorker {
 
   @Autowired
-  private AuthenticationManager authenticationManager;
-
-  @Autowired
-  private JwtUserDetailsService userDetailsService;
-
-  @Autowired
-  private JwtTokenUtil jwtTokenUtil;
+  private UserService userService;
 
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   @Async("workerExecutor")
-  public void login() {
-    final String QUEUE_NAME = "login";
+  public void profile() {
+    final String QUEUE_NAME = "profile";
     ConnectionFactory factory = new ConnectionFactory();
     factory.setHost("localhost");
 
@@ -46,7 +36,7 @@ public class AuthWorker {
 
       channel.basicQos(1);
 
-      log.info("[login]  Awaiting login requests");
+      log.info("[profile]  Awaiting reload profile requests");
 
       Object monitor = new Object();
       DeliverCallback deliverCallback = (consumerTag, delivery) -> {
@@ -57,18 +47,11 @@ public class AuthWorker {
 
         String response = "";
 
-        String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-        LoginRequest loginRequest = objectMapper.readValue(message, LoginRequest.class);
-        log.info("[login]  Receive login request for email or phone: " + loginRequest.getEmailOrPhone());
+        String email = new String(delivery.getBody(), StandardCharsets.UTF_8);
+        log.info("[profile]  Receive reload profile for email: " + email);
+        User user = userService.getUserByEmail(email);
+        response = objectMapper.writeValueAsString(user);
 
-        try {
-          authenticate(loginRequest.getEmailOrPhone(), loginRequest.getPassword());
-          final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
-          final String token = jwtTokenUtil.generateToken(userDetails);
-          response = token;
-        } catch (Exception e) {
-          response = "bad credentials";
-        }
         channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.getBytes(StandardCharsets.UTF_8));
         channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         synchronized (monitor) {
@@ -88,16 +71,6 @@ public class AuthWorker {
       }
     } catch (Exception e) {
       e.printStackTrace();
-    }
-  }
-
-  private void authenticate(String username, String password) throws Exception {
-    try {
-      authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-    } catch (DisabledException e) {
-      throw new Exception("USER_DISABLED", e);
-    } catch (BadCredentialsException e) {
-      throw new Exception("INVALID_CREDENTIALS", e);
     }
   }
 }
