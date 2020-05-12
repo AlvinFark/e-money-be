@@ -15,4 +15,14 @@ public class UserServiceImpl implements UserService{
     public User getUserById(long id) {
         return userMapper.getUserById(id);
     }
+
+    @Override
+    public User getUserByEmailOrPhone(String emailOrPhone) {
+        return userMapper.getUserByEmailOrPhone(emailOrPhone);
+    }
+
+    public User insert(User user) {
+        userMapper.insert(user);
+        return getUserByEmailOrPhone(user.getPhone());
+    }
 }

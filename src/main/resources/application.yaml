@@ -8,3 +8,5 @@ spring:
     hikari:
       maximum-pool-size: 10
 
+jwt:
+  secret: superverysecreykey
