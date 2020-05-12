@@ -10,3 +10,7 @@ spring:
 
 jwt:
   secret: superverysecreykey
+
+phoneNumber: +12058439958
+twilioAccountSid: ACc9524830957a04cfdc9851c0392aacb9
+twilioAuthToken: bbd1db31c71005c084587ef4c708a52f
