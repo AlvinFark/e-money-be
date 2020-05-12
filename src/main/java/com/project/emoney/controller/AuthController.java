@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.regex.Pattern;
+
 @RestController
 @CrossOrigin
 public class AuthController {
@@ -22,6 +24,9 @@ public class AuthController {
   private JwtUserDetailsService userDetailsService;
 
   ObjectMapper objectMapper = new ObjectMapper();
+
+  String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=\\S+$).{8,}$";
+  String emailRegex = ".+@.+\\..+";
 
   @RequestMapping(value = "/api/register", method = RequestMethod.POST)
   public ResponseEntity<?> saveUser(@RequestBody User user){
