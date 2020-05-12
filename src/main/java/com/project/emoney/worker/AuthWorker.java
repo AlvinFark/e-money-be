@@ -92,6 +92,7 @@ public class AuthWorker {
             otp.setEmailOrPhone(loginRequest.getEmailOrPhone());
             otp.setCode(generator.generateOtp());
             otp.setTime(LocalDateTime.now());
+            System.out.println(twilioAccountSid);
             Twilio.init(twilioAccountSid, twilioAuthToken);
             Message.creator(
                 new PhoneNumber("+"+user.getPhone()),
