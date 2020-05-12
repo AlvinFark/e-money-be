@@ -10,6 +10,7 @@ import com.project.emoney.security.JwtUserDetailsService;
 import com.project.emoney.utils.Generator;
 import com.rabbitmq.client.*;
 import com.twilio.Twilio;
+import com.twilio.exception.ApiException;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import org.slf4j.Logger;
@@ -45,14 +46,11 @@ public class AuthWorker {
   @Autowired
   private Generator generator;
 
-  @Value("${phoneNumber}")
-  private String myTwilioPhoneNumber;
+  private String myTwilioPhoneNumber = System.getenv("phoneNumber");
 
-  @Value("${twilioAccountSid}")
-  private String twilioAccountSid;
+  private String twilioAccountSid = System.getenv("twilioAccountSid");
 
-  @Value("${twilioAuthToken}")
-  private String twilioAuthToken;
+  private String twilioAuthToken = System.getenv("twilioAuthToken");
 
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
@@ -96,6 +94,7 @@ public class AuthWorker {
             otp.setTime(LocalDateTime.now());
             otpService.create(otp);
             Twilio.init(twilioAccountSid, twilioAuthToken);
+            System.out.println(user.getPhone());
             Message.creator(
                 new PhoneNumber("+"+user.getPhone()),
                 new PhoneNumber(myTwilioPhoneNumber),
@@ -105,6 +104,8 @@ public class AuthWorker {
           } else {
             response = "inactive account, check your email or resend email verification";
           }
+        } catch (ApiException e) {
+          e.printStackTrace();
         } catch (Exception e) {
           response = "bad credentials";
         }
