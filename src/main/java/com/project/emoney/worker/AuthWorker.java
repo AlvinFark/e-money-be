@@ -65,7 +65,7 @@ public class AuthWorker {
           authenticate(loginRequest.getEmailOrPhone(), loginRequest.getPassword());
           final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
           final String token = jwtTokenUtil.generateToken(userDetails);
-          response = "success";
+          response = token;
         } catch (Exception e) {
           response = "bad credentials";
         }
