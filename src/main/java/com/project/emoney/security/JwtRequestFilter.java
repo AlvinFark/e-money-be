@@ -4,7 +4,13 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.emoney.payload.SimpleResponseWrapper;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +26,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
   private JwtUserDetailsService jwtUserDetailsService;
   @Autowired
   private JwtTokenUtil jwtTokenUtil;
+  ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -33,10 +40,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       jwtToken = requestTokenHeader.substring(7);
       try {
         username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+      } catch (SignatureException | MalformedJwtException e) {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponseWrapper(HttpStatus.UNAUTHORIZED.value(),"invalid token")));
       } catch (IllegalArgumentException e) {
         System.out.println("Unable to get JWT Token");
       } catch (ExpiredJwtException e) {
-        System.out.println("JWT Token has expired");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponseWrapper(HttpStatus.UNAUTHORIZED.value(),"expired token")));
       }
     } else {
       logger.warn("JWT Token does not begin with Bearer String");

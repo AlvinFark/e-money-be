@@ -25,4 +25,9 @@ public class UserServiceImpl implements UserService{
         userMapper.insert(user);
         return getUserByEmailOrPhone(user.getPhone());
     }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userMapper.getUserByEmail(email);
+    }
 }
