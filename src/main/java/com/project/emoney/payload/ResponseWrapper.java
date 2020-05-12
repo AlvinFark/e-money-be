@@ -11,4 +11,9 @@ public class ResponseWrapper {
   int code;
   String message;
   Object data;
+
+  public ResponseWrapper(int code, String message) {
+    this.code = code;
+    this.message = message;
+  }
 }

@@ -20,4 +20,9 @@ public class UserServiceImpl implements UserService{
     public User getUserByEmailOrPhone(String emailOrPhone) {
         return userMapper.getUserByEmailOrPhone(emailOrPhone);
     }
+
+    public User insert(User user) {
+        System.out.println(user.toString());
+        return userMapper.insert(user);
+    }
 }

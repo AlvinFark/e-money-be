@@ -1,5 +1,12 @@
-package com.project.emoney.security;
+package com.project.emoney.controller;
+import com.project.emoney.entity.User;
+import com.project.emoney.payload.ResponseWrapper;
+import com.project.emoney.security.JwtRequest;
+import com.project.emoney.security.JwtResponse;
+import com.project.emoney.security.JwtTokenUtil;
+import com.project.emoney.security.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@RestController("/api")
 @CrossOrigin
-public class JwtAuthenticationController {
+public class AuthController {
 
   @Autowired
   private AuthenticationManager authenticationManager;
@@ -23,14 +30,20 @@ public class JwtAuthenticationController {
   @Autowired
   private JwtUserDetailsService userDetailsService;
 
-  @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+  @RequestMapping(value = "/register", method = RequestMethod.POST)
+  public ResponseEntity<?> saveUser(@RequestBody User user) throws Exception {
+    return new ResponseEntity<>(new ResponseWrapper(201, "success"), HttpStatus.OK);
+  }
+
+  @RequestMapping(value = "/login", method = RequestMethod.POST)
   public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
-    authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+    authenticate(authenticationRequest.getEmailOrPhone(), authenticationRequest.getPassword());
     final UserDetails userDetails = userDetailsService
-        .loadUserByUsername(authenticationRequest.getUsername());
+        .loadUserByUsername(authenticationRequest.getEmailOrPhone());
     final String token = jwtTokenUtil.generateToken(userDetails);
     return ResponseEntity.ok(new JwtResponse(token));
   }
+
   private void authenticate(String username, String password) throws Exception {
     try {
       authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));

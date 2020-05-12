@@ -13,7 +13,7 @@ public class User {
   String name;
   String email;
   String phone;
-  @JsonIgnore String password;
+  String password;
   long balance;
   boolean active;
 }
