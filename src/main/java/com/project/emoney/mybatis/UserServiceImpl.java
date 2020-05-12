@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService{
     }
 
     public User insert(User user) {
-        System.out.println(user.toString());
-        return userMapper.insert(user);
+        userMapper.insert(user);
+        return getUserByEmailOrPhone(user.getPhone());
     }
 }

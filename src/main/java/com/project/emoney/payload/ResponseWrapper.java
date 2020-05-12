@@ -7,13 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponseWrapper {
-  int code;
-  String message;
+public class ResponseWrapper extends SimpleResponseWrapper {
   Object data;
 
-  public ResponseWrapper(int code, String message) {
-    this.code = code;
-    this.message = message;
+  public ResponseWrapper(int code, String message, Object data) {
+    super(code, message);
+    this.data = data;
   }
 }

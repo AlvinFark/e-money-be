@@ -2,8 +2,10 @@ package com.project.emoney.mapper;
 
 import com.project.emoney.entity.User;
 import org.apache.ibatis.annotations.*;
+import org.springframework.stereotype.Repository;
 
 @Mapper
+@Repository
 public interface UserMapper {
 
     @Select("SELECT * FROM user WHERE id = #{id}")
@@ -13,5 +15,5 @@ public interface UserMapper {
     User getUserByEmailOrPhone(String emailOrPhone);
 
     @Insert("INSERT INTO user (name, email, phone, password, balance, active) VALUES (#{name}, #{email}, #{phone}, #{password}, 0, false)")
-    User insert(User user);
+    void insert(User user);
 }

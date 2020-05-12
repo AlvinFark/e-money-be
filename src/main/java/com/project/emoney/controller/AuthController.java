@@ -1,6 +1,7 @@
 package com.project.emoney.controller;
 import com.project.emoney.entity.User;
 import com.project.emoney.payload.ResponseWrapper;
+import com.project.emoney.payload.SimpleResponseWrapper;
 import com.project.emoney.security.JwtRequest;
 import com.project.emoney.security.JwtResponse;
 import com.project.emoney.security.JwtTokenUtil;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/api")
+@RestController
 @CrossOrigin
 public class AuthController {
 
@@ -30,18 +31,23 @@ public class AuthController {
   @Autowired
   private JwtUserDetailsService userDetailsService;
 
-  @RequestMapping(value = "/register", method = RequestMethod.POST)
-  public ResponseEntity<?> saveUser(@RequestBody User user) throws Exception {
-    return new ResponseEntity<>(new ResponseWrapper(201, "success"), HttpStatus.OK);
+  @RequestMapping(value = "/api/register", method = RequestMethod.POST)
+  public ResponseEntity<?> saveUser(@RequestBody User user){
+    userDetailsService.save(user);
+    return new ResponseEntity<>(new SimpleResponseWrapper(201, "success"), HttpStatus.OK);
   }
 
-  @RequestMapping(value = "/login", method = RequestMethod.POST)
-  public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
-    authenticate(authenticationRequest.getEmailOrPhone(), authenticationRequest.getPassword());
+  @RequestMapping(value = "/api/login", method = RequestMethod.POST)
+  public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) {
+    try {
+      authenticate(authenticationRequest.getEmailOrPhone(), authenticationRequest.getPassword());
+    } catch (Exception e) {
+      return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad credentials"), HttpStatus.BAD_REQUEST);
+    }
     final UserDetails userDetails = userDetailsService
         .loadUserByUsername(authenticationRequest.getEmailOrPhone());
     final String token = jwtTokenUtil.generateToken(userDetails);
-    return ResponseEntity.ok(new JwtResponse(token));
+    return new ResponseEntity<>(new SimpleResponseWrapper(201, "success"), HttpStatus.OK);
   }
 
   private void authenticate(String username, String password) throws Exception {
