@@ -1,13 +1,21 @@
 package com.project.emoney.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.emoney.entity.OTP;
+import com.project.emoney.entity.User;
+import com.project.emoney.mybatis.OTPService;
+import com.project.emoney.mybatis.UserService;
 import com.project.emoney.payload.LoginRequest;
-import com.project.emoney.security.JwtTokenUtil;
 import com.project.emoney.security.JwtUserDetailsService;
+import com.project.emoney.utils.Generator;
 import com.rabbitmq.client.*;
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -17,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 @Service
 public class AuthWorker {
@@ -28,7 +37,22 @@ public class AuthWorker {
   private JwtUserDetailsService userDetailsService;
 
   @Autowired
-  private JwtTokenUtil jwtTokenUtil;
+  private UserService userService;
+
+  @Autowired
+  private OTPService otpService;
+
+  @Autowired
+  private Generator generator;
+
+  @Value("${phoneNumber}")
+  private String myTwilioPhoneNumber;
+
+  @Value("${twilioAccountSid}")
+  private String twilioAccountSid;
+
+  @Value("${twilioAuthToken}")
+  private String twilioAuthToken;
 
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
@@ -64,8 +88,23 @@ public class AuthWorker {
         try {
           authenticate(loginRequest.getEmailOrPhone(), loginRequest.getPassword());
           final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
-          final String token = jwtTokenUtil.generateToken(userDetails);
-          response = "success";
+          User user = userService.getUserByEmail(userDetails.getUsername());
+          if (user.isActive()){
+            OTP otp = new OTP();
+            otp.setEmailOrPhone(loginRequest.getEmailOrPhone());
+            otp.setCode(generator.generateOtp());
+            otp.setTime(LocalDateTime.now());
+            otpService.create(otp);
+            Twilio.init(twilioAccountSid, twilioAuthToken);
+            Message.creator(
+                new PhoneNumber("+"+user.getPhone()),
+                new PhoneNumber(myTwilioPhoneNumber),
+                "Kode OTP: "+otp.getCode()).create();
+//            final String token = jwtTokenUtil.generateToken(userDetails);
+            response = "success, otp sent";
+          } else {
+            response = "inactive account, check your email or resend email verification";
+          }
         } catch (Exception e) {
           response = "bad credentials";
         }
