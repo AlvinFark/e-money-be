@@ -11,6 +11,9 @@ public interface UserMapper {
     @Select("SELECT * FROM user WHERE id = #{id}")
     User getUserById(long id);
 
+    @Select("SELECT * FROM user WHERE email = #{email}")
+    User getUserByEmail(String email);
+
     @Select("SELECT * FROM user WHERE email = #{emailOrPhone} OR phone = #{emailOrPhone}")
     User getUserByEmailOrPhone(String emailOrPhone);
 
