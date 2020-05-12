@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class Transaction {
   long id;
   @JsonIgnore long userId;
-  long cardNumber;
+  String cardNumber;
   int value;
   int fee;
   Status status;

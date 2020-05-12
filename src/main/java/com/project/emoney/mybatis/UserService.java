@@ -5,4 +5,5 @@ import com.project.emoney.entity.User;
 public interface UserService {
 
     User getUserById(long id);
+    User getUserByEmailOrPhone(String emailOrPhone);
 }
