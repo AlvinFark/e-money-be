@@ -17,5 +17,7 @@ public class Transaction {
   int value;
   int fee;
   Status status;
+  TransactionMethod method;
   LocalDateTime time;
+  LocalDateTime expiry;
 }
