@@ -92,14 +92,13 @@ public class AuthWorker {
             otp.setEmailOrPhone(loginRequest.getEmailOrPhone());
             otp.setCode(generator.generateOtp());
             otp.setTime(LocalDateTime.now());
-            otpService.create(otp);
             Twilio.init(twilioAccountSid, twilioAuthToken);
-            System.out.println(user.getPhone());
             Message.creator(
                 new PhoneNumber("+"+user.getPhone()),
                 new PhoneNumber(myTwilioPhoneNumber),
                 "Kode OTP: "+otp.getCode()).create();
 //            final String token = jwtTokenUtil.generateToken(userDetails);
+            otpService.create(otp);
             response = "success, otp sent";
           } else {
             response = "inactive account, check your email or resend email verification";
