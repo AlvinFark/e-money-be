@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -22,10 +25,15 @@ public class RPCClient implements AutoCloseable {
   private Channel channel;
   private String requestQueueName;
 
-  public RPCClient(String requestQueueName) throws IOException, TimeoutException {
+  public RPCClient(String requestQueueName) throws Exception {
     this.requestQueueName = requestQueueName;
+
+    String uri = System.getenv("CLOUDAMQP_URL");
+    if (uri == null) uri = "amqp://guest:guest@localhost";
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost("amqp://wmaqowtk:SFX4rW...@zebra.rmq.cloudamqp.com/wmaqowtk ");
+    factory.setUri(uri);
+    factory.setRequestedHeartbeat(30);
+    factory.setConnectionTimeout(30);
     connection = factory.newConnection();
     channel = connection.createChannel();
   }
