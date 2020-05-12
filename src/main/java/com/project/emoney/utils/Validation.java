@@ -43,4 +43,26 @@ public class Validation {
       return false;
     }
   }
+
+  public boolean phone (String phone) {
+    if (phone.length()<9||phone.length()>12){
+      return false;
+    }
+    try {
+      Long.parseLong(phone);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  public String convertPhone(String phone) {
+    if (phone.charAt(0)=='+'){
+      return phone.substring(1);
+    }
+    if (phone.charAt(0)=='0'){
+      return "62" + phone.substring(1);
+    }
+    return phone;
+  }
 }
