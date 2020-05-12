@@ -121,6 +121,7 @@ public class AuthWorker {
           }
         } catch (ApiException e) {
           e.printStackTrace();
+          response = "unverified number";
         } catch (Exception e) {
           response = "bad credentials";
         }
