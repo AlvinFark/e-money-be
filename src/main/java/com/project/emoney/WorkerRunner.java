@@ -20,6 +20,5 @@ public class WorkerRunner implements CommandLineRunner {
     authWorker.login();
     authWorker.login();
     userWorker.profile();
-    System.out.println(System.getenv("twilioAccountSid"));
   }
 }
