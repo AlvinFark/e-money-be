@@ -1,7 +1,7 @@
 
 spring:
   datasource:
-    url: jdbc:mysql://be28f19b63464e:82a9935c@us-cdbr-east-06.cleardb.net/heroku_fd95907be95b1dc?reconnect=true
+    url: jdbc:mysql://b256b206ac8263:7f7b13ed@us-cdbr-east-06.cleardb.net/heroku_48cf622b47df9e1?reconnect=true
     username: b256b206ac8263
     password: 7f7b13ed
 
