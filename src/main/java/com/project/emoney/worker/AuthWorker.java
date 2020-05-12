@@ -25,7 +25,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 
 @Service
@@ -56,10 +60,22 @@ public class AuthWorker {
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   @Async("workerExecutor")
-  public void login() {
+  public void login() throws NoSuchAlgorithmException, KeyManagementException, URISyntaxException {
     final String QUEUE_NAME = "login";
+
+    final URI rabbitMqUrl;
+    try {
+      rabbitMqUrl = new URI(System.getenv("CLOUDAMQP_URL"));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost("localhost");
+    factory.setUsername(rabbitMqUrl.getUserInfo().split(":")[0]);
+    factory.setPassword(rabbitMqUrl.getUserInfo().split(":")[1]);
+    factory.setHost(rabbitMqUrl.getHost());
+    factory.setPort(rabbitMqUrl.getPort());
+    factory.setVirtualHost(rabbitMqUrl.getPath().substring(1));
 
     try (Connection connection = factory.newConnection();
          Channel channel = connection.createChannel()) {
@@ -92,7 +108,6 @@ public class AuthWorker {
             otp.setEmailOrPhone(loginRequest.getEmailOrPhone());
             otp.setCode(generator.generateOtp());
             otp.setTime(LocalDateTime.now());
-            System.out.println(twilioAccountSid);
             Twilio.init(twilioAccountSid, twilioAuthToken);
             Message.creator(
                 new PhoneNumber("+"+user.getPhone()),

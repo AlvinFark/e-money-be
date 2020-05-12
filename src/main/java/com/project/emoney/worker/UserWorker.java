@@ -12,6 +12,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
 @Service
@@ -26,8 +28,20 @@ public class UserWorker {
   @Async("workerExecutor")
   public void profile() {
     final String QUEUE_NAME = "profile";
+
+    final URI rabbitMqUrl;
+    try {
+      rabbitMqUrl = new URI(System.getenv("CLOUDAMQP_URL"));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost("localhost");
+    factory.setUsername(rabbitMqUrl.getUserInfo().split(":")[0]);
+    factory.setPassword(rabbitMqUrl.getUserInfo().split(":")[1]);
+    factory.setHost(rabbitMqUrl.getHost());
+    factory.setPort(rabbitMqUrl.getPort());
+    factory.setVirtualHost(rabbitMqUrl.getPath().substring(1));
 
     try (Connection connection = factory.newConnection();
          Channel channel = connection.createChannel()) {
