@@ -14,8 +14,8 @@ public class Transaction {
   long id;
   @JsonIgnore long userId;
   String cardNumber;
-  int value;
-  int fee;
+  long value;
+  long fee;
   Status status;
   TransactionMethod method;
   LocalDateTime time;
