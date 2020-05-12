@@ -1,11 +1,11 @@
 package com.project.emoney.controller;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.User;
-import com.project.emoney.payload.ResponseWrapper;
 import com.project.emoney.payload.SimpleResponseWrapper;
-import com.project.emoney.security.JwtRequest;
-import com.project.emoney.security.JwtResponse;
+import com.project.emoney.payload.LoginRequest;
 import com.project.emoney.security.JwtTokenUtil;
 import com.project.emoney.security.JwtUserDetailsService;
+import com.project.emoney.utils.RPCClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   @Autowired
-  private AuthenticationManager authenticationManager;
-  @Autowired
-  private JwtTokenUtil jwtTokenUtil;
-  @Autowired
   private JwtUserDetailsService userDetailsService;
+
+  ObjectMapper objectMapper = new ObjectMapper();
 
   @RequestMapping(value = "/api/register", method = RequestMethod.POST)
   public ResponseEntity<?> saveUser(@RequestBody User user){
@@ -38,25 +36,12 @@ public class AuthController {
   }
 
   @RequestMapping(value = "/api/login", method = RequestMethod.POST)
-  public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) {
-    try {
-      authenticate(authenticationRequest.getEmailOrPhone(), authenticationRequest.getPassword());
-    } catch (Exception e) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad credentials"), HttpStatus.BAD_REQUEST);
+  public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest loginRequest) throws Exception {
+    RPCClient rpcClient = new RPCClient("login");
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
+    if (responseMQ.equals("success")){
+      return new ResponseEntity<>(new SimpleResponseWrapper(201, responseMQ), HttpStatus.OK);
     }
-    final UserDetails userDetails = userDetailsService
-        .loadUserByUsername(authenticationRequest.getEmailOrPhone());
-    final String token = jwtTokenUtil.generateToken(userDetails);
-    return new ResponseEntity<>(new SimpleResponseWrapper(201, "success"), HttpStatus.OK);
-  }
-
-  private void authenticate(String username, String password) throws Exception {
-    try {
-      authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-    } catch (DisabledException e) {
-      throw new Exception("USER_DISABLED", e);
-    } catch (BadCredentialsException e) {
-      throw new Exception("INVALID_CREDENTIALS", e);
-    }
+    return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
   }
 }

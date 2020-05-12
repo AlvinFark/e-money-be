@@ -25,7 +25,7 @@ public class RPCClient implements AutoCloseable {
   public RPCClient(String requestQueueName) throws IOException, TimeoutException {
     this.requestQueueName = requestQueueName;
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost("localhost");
+    factory.setHost("amqp://wmaqowtk:SFX4rW...@zebra.rmq.cloudamqp.com/wmaqowtk ");
     connection = factory.newConnection();
     channel = connection.createChannel();
   }
