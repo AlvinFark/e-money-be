@@ -41,6 +41,7 @@ public class AuthController {
     if (!validation.password(loginRequest.getPassword())){
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
     }
+
     //validate email & convert phone & validate phone
     if (!validation.email(loginRequest.getEmailOrPhone())){
       loginRequest.setEmailOrPhone(validation.convertPhone(loginRequest.getEmailOrPhone()));
@@ -48,9 +49,11 @@ public class AuthController {
         return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
       }
     }
+
     //send and receive MQ
     RPCClient rpcClient = new RPCClient("login");
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
+
     //translate MQ response
     if (responseMQ.equals("bad credentials")) {
       return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);

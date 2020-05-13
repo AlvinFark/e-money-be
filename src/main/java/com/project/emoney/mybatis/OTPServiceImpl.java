@@ -15,4 +15,9 @@ public class OTPServiceImpl implements OTPService {
   public void create(OTP otp) {
     otpMapper.create(otp);
   }
+
+  @Override
+  public OTP getByCodeOrderByTimeDesc(String code) {
+    return otpMapper.getByCodeOrderByTimeDesc(code);
+  }
 }

@@ -5,26 +5,17 @@ import com.project.emoney.entity.OTP;
 import com.project.emoney.entity.User;
 import com.project.emoney.mybatis.OTPService;
 import com.project.emoney.mybatis.UserService;
-import com.project.emoney.payload.LoginRequest;
+import com.project.emoney.payload.OTPRequest;
 import com.project.emoney.payload.UserWithToken;
 import com.project.emoney.security.JwtTokenUtil;
 import com.project.emoney.security.JwtUserDetailsService;
-import com.project.emoney.utils.Generator;
 import com.rabbitmq.client.*;
-import com.twilio.Twilio;
-import com.twilio.exception.ApiException;
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.type.PhoneNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -33,10 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Service
-public class AuthWorker {
-
-  @Autowired
-  private AuthenticationManager authenticationManager;
+public class OTPWorker {
 
   @Autowired
   private JwtUserDetailsService userDetailsService;
@@ -48,23 +36,14 @@ public class AuthWorker {
   private OTPService otpService;
 
   @Autowired
-  private Generator generator;
-
-  @Autowired
   private JwtTokenUtil jwtTokenUtil;
-
-  private String myTwilioPhoneNumber = System.getenv("phoneNumber");
-
-  private String twilioAccountSid = System.getenv("twilioAccountSid");
-
-  private String twilioAuthToken = System.getenv("twilioAuthToken");
 
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   @Async("workerExecutor")
-  public void login() {
-    final String QUEUE_NAME = "login";
+  public void send() {
+    final String QUEUE_NAME = "otp";
 
     final URI rabbitMqUrl;
     try {
@@ -87,7 +66,7 @@ public class AuthWorker {
 
       channel.basicQos(1);
 
-      log.info("[login]  Awaiting login requests");
+      log.info("[otp]  Awaiting otp verification requests");
 
       Object monitor = new Object();
       DeliverCallback deliverCallback = (consumerTag, delivery) -> {
@@ -98,20 +77,35 @@ public class AuthWorker {
 
         String response = "";
         String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-        LoginRequest loginRequest = objectMapper.readValue(message, LoginRequest.class);
-        log.info("[login]  Receive login request for email or phone: " + loginRequest.getEmailOrPhone());
+        OTPRequest otpRequest = objectMapper.readValue(message, OTPRequest.class);
+        log.info("[otp]  Receive otp verification request for email or phone: " + otpRequest.getEmailOrPhone());
 
         try {
-          authenticate(loginRequest.getEmailOrPhone(), loginRequest.getPassword());
-          final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
+          final UserDetails userDetails = userDetailsService.loadUserByUsername(otpRequest.getEmailOrPhone());
           User user = userService.getUserByEmail(userDetails.getUsername());
           if (user.isActive()){
+            response = "account already active";
+          //cek master key, master key untuk kebutuhan fe qa
+          } else if (otpRequest.getCode().equals("6666")) {
             response = objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
           } else {
-            response = sendOtp(user.getPhone());
+            OTP otp = otpService.getByCodeOrderByTimeDesc(otpRequest.getCode());
+            //cek jika otp null atau otp bukan punya user tersebut
+            if (otp==null||(!(otp.getEmailOrPhone().equals(user.getEmail())||otp.getEmailOrPhone().equals(user.getPassword())))) {
+              response = "invalid code";
+            //bukan master key dan lebih dari batas waktu
+            } else if (otp.getTime().plusMinutes(2).isAfter(LocalDateTime.now())) {
+              System.out.println(otp.getTime().plusMinutes(2));
+              System.out.println(LocalDateTime.now());
+              response = "code expired";
+            } else {
+              response = objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
+              System.out.println(otp.getTime().plusMinutes(2));
+              System.out.println(LocalDateTime.now());
+            }
           }
-        } catch (Exception e) {
-          response = "bad credentials";
+        } catch (UsernameNotFoundException e){
+          response = "user not found";
         }
 
         channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.getBytes(StandardCharsets.UTF_8));
@@ -120,7 +114,6 @@ public class AuthWorker {
           monitor.notify();
         }
       };
-
       channel.basicConsume(QUEUE_NAME, false, deliverCallback, (consumerTag -> { }));
       while (true) {
         synchronized (monitor) {
@@ -133,34 +126,6 @@ public class AuthWorker {
       }
     } catch (Exception e) {
       e.printStackTrace();
-    }
-  }
-
-  private String sendOtp(String phone) {
-    try {
-      OTP otp = new OTP();
-      otp.setEmailOrPhone(phone);
-      otp.setCode(generator.generateOtp());
-      otp.setTime(LocalDateTime.now());
-      Twilio.init(twilioAccountSid, twilioAuthToken);
-      Message.creator(
-          new PhoneNumber("+"+phone),
-          new PhoneNumber(myTwilioPhoneNumber),
-          "Kode OTP: "+otp.getCode()).create();
-      otpService.create(otp);
-      return "inactive account, otp sent";
-    } catch (ApiException e) {
-      return "unverified number, can't send otp";
-    }
-  }
-
-  private void authenticate(String username, String password) throws Exception {
-    try {
-      authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-    } catch (DisabledException e) {
-      throw new Exception("USER_DISABLED", e);
-    } catch (BadCredentialsException e) {
-      throw new Exception("INVALID_CREDENTIALS", e);
     }
   }
 }
