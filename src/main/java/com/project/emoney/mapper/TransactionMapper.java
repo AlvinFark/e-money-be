@@ -1,5 +1,6 @@
 package com.project.emoney.mapper;
 
+import com.project.emoney.entity.Status;
 import com.project.emoney.entity.Transaction;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -14,15 +15,15 @@ import java.util.List;
 public interface TransactionMapper {
 
     @Select("SELECT * FROM Transaction WHERE userId = #{userId} AND status = 'IN_PROGRESS'")
-    List<Transaction> getInProgress(long userId);
+    List<Transaction> getInProgressByUserId(long userId);
 
     @Select("SELECT * FROM Transaction WHERE userId = #{userId}")
-    List<Transaction> getCompleted(long userId);
+    List<Transaction> getAllByUserId(long userId);
 
     @Insert("INSERT INTO Transaction (userId, cardNumber, value, fee, status, time, method, expiry) VALUES" +
         "(#{userId}, #{cardNumber}, #{value}, #{fee}, #{status}, #{time}, #{method}, #{expiry})")
     void insert(Transaction transaction);
 
-    @Update("UPDATE Transaction SET status = 'CANCELLED' WHERE id = #{id}")
-    void updateTransaction(long id);
+    @Update("UPDATE Transaction SET status = #{status} WHERE id = #{id}")
+    void setStatusById(long id, Status status);
 }

@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.Transaction;
 import com.project.emoney.entity.User;
-import com.project.emoney.payload.ResponseWrapper;
-import com.project.emoney.payload.SimpleResponseWrapper;
-import com.project.emoney.payload.TransactionRequest;
-import com.project.emoney.payload.UserWrapper;
+import com.project.emoney.payload.*;
 import com.project.emoney.security.CurrentUser;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
@@ -67,7 +64,7 @@ public class TransactionController {
   public ResponseEntity<?> getInProgress(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
     RPCClient rpcClient = new RPCClient("in-progress");
     String responseMQ = rpcClient.call(userDetails.getUsername());
-    List<Transaction> list = objectMapper.readValue(responseMQ, new TypeReference<List<Transaction>>() {});
+    List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
 
     return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
   }
@@ -76,7 +73,7 @@ public class TransactionController {
   public ResponseEntity<?> getCompleted(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
     RPCClient rpcClient = new RPCClient("completed");
     String responseMQ = rpcClient.call(userDetails.getUsername());
-    List<Transaction> list = objectMapper.readValue(responseMQ, new TypeReference<List<Transaction>>() {});
+    List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
 
     return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
   }

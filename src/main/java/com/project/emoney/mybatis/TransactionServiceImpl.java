@@ -1,5 +1,6 @@
 package com.project.emoney.mybatis;
 
+import com.project.emoney.entity.Status;
 import com.project.emoney.entity.Transaction;
 import com.project.emoney.mapper.TransactionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +15,13 @@ public class TransactionServiceImpl implements TransactionService {
     private TransactionMapper transactionMapper;
 
     @Override
-    public List<Transaction> getInProgress(long id) {
-        return transactionMapper.getInProgress(id);
+    public List<Transaction> getInProgressByUserId(long id) {
+        return transactionMapper.getInProgressByUserId(id);
     }
 
     @Override
-    public List<Transaction> getCompleted(long id) {
-        return transactionMapper.getCompleted(id);
+    public List<Transaction> getAllByUserId(long id) {
+        return transactionMapper.getAllByUserId(id);
     }
 
     @Override
@@ -29,7 +30,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void updateTransaction(long id) {
-        transactionMapper.updateTransaction(id);
+    public void updateStatusById(long id, Status status) {
+        transactionMapper.setStatusById(id, status);
     }
 }
