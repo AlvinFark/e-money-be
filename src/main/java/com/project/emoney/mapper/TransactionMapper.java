@@ -20,10 +20,16 @@ public interface TransactionMapper {
     @Select("SELECT * FROM Transaction WHERE userId = #{userId}")
     List<Transaction> getAllByUserId(long userId);
 
+    @Select("SELECT * FROM Transaction WHERE id = #{id}")
+    Transaction getById(long id);
+
     @Insert("INSERT INTO Transaction (userId, cardNumber, value, fee, status, time, method, expiry) VALUES" +
         "(#{userId}, #{cardNumber}, #{value}, #{fee}, #{status}, #{time}, #{method}, #{expiry})")
     void insert(Transaction transaction);
 
     @Update("UPDATE Transaction SET status = #{status} WHERE id = #{id}")
     void setStatusById(long id, Status status);
+
+    @Update("UPDATE Transaction SET imagePath = #{extension} WHERE id = #{id}")
+    void setExtensionById(long id, String extension);
 }

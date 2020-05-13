@@ -15,6 +15,11 @@ public class TransactionServiceImpl implements TransactionService {
     private TransactionMapper transactionMapper;
 
     @Override
+    public Transaction getById(long id) {
+        return transactionMapper.getById(id);
+    }
+
+    @Override
     public List<Transaction> getInProgressByUserId(long id) {
         return transactionMapper.getInProgressByUserId(id);
     }
@@ -32,5 +37,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void updateStatusById(long id, Status status) {
         transactionMapper.setStatusById(id, status);
+    }
+
+    @Override
+    public void setExtensionById(long id, String extension) {
+        transactionMapper.setExtensionById(id, extension);
     }
 }
