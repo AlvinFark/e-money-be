@@ -1,19 +1,21 @@
 package com.project.emoney.worker;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.*;
 import com.project.emoney.mybatis.TopUpOptionService;
 import com.project.emoney.mybatis.TransactionService;
 import com.project.emoney.mybatis.UserService;
 import com.project.emoney.payload.TopUpRequest;
+import com.project.emoney.payload.TransactionDTO;
 import com.project.emoney.payload.TransactionRequest;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class TransactionWorker {
@@ -70,4 +72,59 @@ public class TransactionWorker {
         status, transactionRequest.getMethod(), LocalDateTime.now().plusHours(7), LocalDateTime.now().plusHours(31));
     transactionService.insert(transaction);
   }
+
+  public String transactionInProgress(String message) throws JsonProcessingException {
+    User user = userService.getUserByEmail(message);
+
+    List<Transaction> list = transactionService.getInProgressByUserId(user.getId());
+
+    //create new list for transaction in-progress
+    List<TransactionDTO> transactionList = new ArrayList<TransactionDTO>();
+
+    for (Transaction transaction: list) {
+        LocalDateTime expiredTime = transaction.getExpiry();
+        LocalDateTime localDateTime = LocalDateTime.now();
+        int compareValue = expiredTime.compareTo(localDateTime);
+        if(compareValue > 0) {
+          //Add to list in-progress
+          transactionList.add(new TransactionDTO(transaction));
+        } else {
+          //Move from in-progress
+          transactionService.updateStatusById(transaction.getId(), Status.FAILED);
+        }
+    }
+    return objectMapper.writeValueAsString(transactionList);
+  }
+
+  public String transactionCompleted(String message) throws JsonProcessingException {
+    String email = message;
+    User user = userService.getUserByEmail(email);
+
+    List<Transaction> list = transactionService.getAllByUserId(user.getId());
+
+    //create new list for transaction completed
+    List<TransactionDTO> transactionList = new ArrayList<TransactionDTO>();
+
+    for (Transaction transaction: list) {
+      //kalo statusnya in progress
+      if (transaction.getStatus()==Status.IN_PROGRESS) {
+        //cek apa udah expired
+        LocalDateTime expiredTime = transaction.getExpiry();
+        LocalDateTime localDateTime = LocalDateTime.now();
+        int compareValue = expiredTime.compareTo(localDateTime);
+        if (compareValue < 0) {
+          //kalo iya update jadi failed terus tambah ke list
+          transaction.setStatus(Status.FAILED);
+          transactionService.updateStatusById(transaction.getId(), Status.FAILED);
+          transactionList.add(new TransactionDTO(transaction));
+        }
+      } else {
+        //kalo gak in progress otomatsi masuk list
+        transactionList.add(new TransactionDTO(transaction));
+      }
+    }
+    return objectMapper.writeValueAsString(transactionList);
+  }
+
+
 }
