@@ -46,7 +46,7 @@ public class Validation {
   }
 
   public boolean phone (String phone) {
-    if (phone.length()<9||phone.length()>12){
+    if (phone.length()<10||phone.length()>14){
       return false;
     }
     try {
