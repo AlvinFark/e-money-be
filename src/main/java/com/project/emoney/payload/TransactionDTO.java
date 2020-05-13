@@ -31,8 +31,8 @@ public class TransactionDTO {
     this.fee = transaction.getFee();
     this.status = transaction.getStatus();
     this.method = transaction.getMethod();
-    this.time = transaction.getTime().toString();
-    this.expiry = transaction.getExpiry().toString();
+    this.time = transaction.getTime().toString().substring(0,10)+' '+transaction.getTime().toString().substring(11);
+    this.expiry = transaction.getExpiry().toString().substring(0,10)+' '+transaction.getExpiry().toString().substring(11);
   }
 }
 
