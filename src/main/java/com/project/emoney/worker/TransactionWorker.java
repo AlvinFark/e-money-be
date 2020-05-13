@@ -1,5 +1,6 @@
 package com.project.emoney.worker;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.*;
 import com.project.emoney.mybatis.TopUpOptionService;
@@ -11,9 +12,8 @@ import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.List;
 
 @Component
 public class TransactionWorker {
@@ -70,4 +70,22 @@ public class TransactionWorker {
         status, transactionRequest.getMethod(), LocalDateTime.now().plusHours(7), LocalDateTime.now().plusHours(31));
     transactionService.insert(transaction);
   }
+
+  public String transactionInProgress(String message) throws JsonProcessingException {
+    String email = message;
+    User user = userService.getUserByEmail(email);
+
+    List<Transaction> list = transactionService.getInProgress(user.getId());
+    return objectMapper.writeValueAsString(list);
+  }
+
+  public String transactionCompleted(String message) throws JsonProcessingException {
+    String email = message;
+    User user = userService.getUserByEmail(email);
+
+    List<Transaction> list = transactionService.getCompleted(user.getId());
+    return objectMapper.writeValueAsString(list);
+  }
+
+
 }

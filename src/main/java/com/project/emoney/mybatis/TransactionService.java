@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface TransactionService {
 
-    List<Transaction> getInprogress(long id);
+    List<Transaction> getInProgress(long id);
+    List<Transaction> getCompleted(long id);
     void insert(Transaction transaction);
 }

@@ -85,6 +85,12 @@ public class WorkerRunner implements CommandLineRunner {
           case "topup-option":
             response = topUpWorker.topUpOption();
             break;
+          case "in-progress":
+            response = transactionWorker.transactionInProgress(mqRequest.getMessage());
+            break;
+          case "completed":
+            response = transactionWorker.transactionCompleted(mqRequest.getMessage());
+            break;
           case "profile":
             response = userWorker.profile(mqRequest.getMessage());
             break;
