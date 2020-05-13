@@ -20,7 +20,7 @@ public class UserController {
         RPCClient rpcClient = new RPCClient("profile");
         String responseMQ = rpcClient.call(userDetails.getUsername());
         User user = objectMapper.readValue(responseMQ, User.class);
-        return new ResponseEntity<>(new ResponseWrapper(201, "success", user), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseWrapper(200, "success", user), HttpStatus.OK);
     }
 
 }

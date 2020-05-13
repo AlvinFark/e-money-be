@@ -83,7 +83,7 @@ public class AuthWorker {
       OTP otp = new OTP();
       otp.setEmailOrPhone(phone);
       otp.setCode(generator.generateOtp());
-      otp.setTime(LocalDateTime.now());
+      otp.setTime(LocalDateTime.now().plusHours(7));
       Twilio.init(twilioAccountSid, twilioAuthToken);
       Message.creator(
           new PhoneNumber("+"+phone),

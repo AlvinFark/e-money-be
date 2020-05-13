@@ -63,7 +63,7 @@ public class AuthController {
       return new ResponseEntity<>(new SimpleResponseWrapper(500, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
     } else {
       UserWithToken userWithToken = objectMapper.readValue(responseMQ, UserWithToken.class);
-      return new ResponseEntity<>(new ResponseWrapper(201, "success", userWithToken), HttpStatus.OK);
+      return new ResponseEntity<>(new ResponseWrapper(202, "accepted", userWithToken), HttpStatus.ACCEPTED);
     }
   }
 }
