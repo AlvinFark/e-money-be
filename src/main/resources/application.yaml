@@ -4,6 +4,8 @@ spring:
     url: jdbc:mysql://b256b206ac8263:7f7b13ed@us-cdbr-east-06.cleardb.net/heroku_48cf622b47df9e1?reconnect=true
     username: b256b206ac8263
     password: 7f7b13ed
+    testOnBorrow: true
+    validationQuery: SELECT 1
 
 #spring:
 #  datasource:

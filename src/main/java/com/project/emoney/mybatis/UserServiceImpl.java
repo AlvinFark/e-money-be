@@ -38,6 +38,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public void setActive(String email) {
+        userMapper.setActive(email);
+    }
+
+    @Override
     public void createVerificationToken(User user, String token) {
         EmailToken newUserToken = new EmailToken(token, user);
         emailTokenMapper.createToken(newUserToken);

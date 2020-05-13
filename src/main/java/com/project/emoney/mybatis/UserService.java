@@ -10,6 +10,7 @@ public interface UserService {
     User getUserByEmail(String email);
 
     User insert(User user);
+    void setActive(String email);
     void createVerificationToken(User user, String token);
     EmailToken getVerificationToken(String VerificationToken);
 

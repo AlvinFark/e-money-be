@@ -1,5 +1,7 @@
 package com.project.emoney.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.emoney.payload.MQRequestWrapper;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -8,14 +10,12 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeoutException;
 
 @Component
 @NoArgsConstructor
@@ -28,17 +28,27 @@ public class RPCClient implements AutoCloseable {
   public RPCClient(String requestQueueName) throws Exception {
     this.requestQueueName = requestQueueName;
 
-    String uri = System.getenv("CLOUDAMQP_URL");
-    if (uri == null) uri = "amqp://guest:guest@localhost";
+    final URI rabbitMqUrl;
+    try {
+      rabbitMqUrl = new URI(System.getenv("CLOUDAMQP_URL"));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setUri(uri);
-    factory.setRequestedHeartbeat(30);
-    factory.setConnectionTimeout(30);
+    factory.setUsername(rabbitMqUrl.getUserInfo().split(":")[0]);
+    factory.setPassword(rabbitMqUrl.getUserInfo().split(":")[1]);
+    factory.setHost(rabbitMqUrl.getHost());
+    factory.setPort(rabbitMqUrl.getPort());
+    factory.setVirtualHost(rabbitMqUrl.getPath().substring(1));
+
     connection = factory.newConnection();
     channel = connection.createChannel();
   }
 
   public String call(String message) throws IOException, InterruptedException {
+//    System.out.println(message);
+//    System.out.println(requestQueueName);
     final String corrId = UUID.randomUUID().toString();
 
     String replyQueueName = channel.queueDeclare().getQueue();
@@ -48,7 +58,11 @@ public class RPCClient implements AutoCloseable {
         .replyTo(replyQueueName)
         .build();
 
-    channel.basicPublish("", requestQueueName, props, message.getBytes(StandardCharsets.UTF_8));
+    ObjectMapper objectMapper = new ObjectMapper();
+    MQRequestWrapper mqRequestWrapper = new MQRequestWrapper(requestQueueName,message);
+    String messageWithQueue = objectMapper.writeValueAsString(mqRequestWrapper);
+//    System.out.println(messageWithQueue);
+    channel.basicPublish("", System.getenv("userMQ"), props, messageWithQueue.getBytes(StandardCharsets.UTF_8));
 
     final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
 
