@@ -62,6 +62,18 @@ public class AuthWorker {
   ObjectMapper objectMapper = new ObjectMapper();
   private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
+  public String register(String message) throws JsonProcessingException {
+    User user = objectMapper.readValue(message, User.class);
+    log.info("[register]  Receive register request for email: " + user.getEmail());
+    log.info("[register]  Receive register request for phone: " + user.getPhone());
+    try {
+      userService.insert(user);
+      return sendOtp(user.getPhone());
+    } catch (Exception e) {
+      return "bad credentials";
+    }
+  }
+
   public String login(String message) throws JsonProcessingException {
       LoginRequest loginRequest = objectMapper.readValue(message, LoginRequest.class);
       log.info("[login]  Receive login request for email or phone: " + loginRequest.getEmailOrPhone());
@@ -93,74 +105,6 @@ public class AuthWorker {
       return "inactive account, otp sent";
     } catch (ApiException e) {
       return "unverified number, can't send otp";
-    }
-  }
-
-  @Async("workerExecutor")
-  public void register() {
-    final String QUEUE_NAME = "register";
-    ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost("localhost");
-
-    try (Connection connection = factory.newConnection();
-         Channel channel = connection.createChannel()) {
-      channel.queueDeclare(QUEUE_NAME, true, false, false, null);
-      channel.queuePurge(QUEUE_NAME);
-
-      channel.basicQos(1);
-
-      log.info("[register]  Awaiting register requests");
-
-      Object monitor = new Object();
-      DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-        AMQP.BasicProperties replyProps = new AMQP.BasicProperties
-                .Builder()
-                .correlationId(delivery.getProperties().getCorrelationId())
-                .build();
-
-        String response = "";
-
-        String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-        User user = objectMapper.readValue(message, User.class);
-        log.info("[register]  Receive register request for email: " + user.getEmail());
-        log.info("[register]  Receive register request for phone: " + user.getPhone());
-
-        try {
-          userService.insert(user);
-          OTP otp = new OTP();
-          otp.setEmailOrPhone(user.getPhone());
-          otp.setCode(generator.generateOtp());
-          otp.setTime(LocalDateTime.now());
-          otpService.create(otp);
-          Twilio.init(twilioAccountSid, twilioAuthToken);
-          Message.creator(
-                  new PhoneNumber("+"+user.getPhone()),
-                  new PhoneNumber(myTwilioPhoneNumber),
-                  "Kode OTP: "+otp.getCode()).create();
-//            final String token = jwtTokenUtil.generateToken(userDetails);
-          response = "success, otp sent";
-        } catch (Exception e) {
-          response = "bad credentials";
-        }
-        channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.getBytes(StandardCharsets.UTF_8));
-        channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-        synchronized (monitor) {
-          monitor.notify();
-        }
-      };
-
-      channel.basicConsume(QUEUE_NAME, false, deliverCallback, (consumerTag -> { }));
-      while (true) {
-        synchronized (monitor) {
-          try {
-            monitor.wait();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 

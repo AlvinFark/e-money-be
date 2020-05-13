@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
@@ -44,11 +45,16 @@ public class AuthController {
   @Autowired
   private ApplicationEventPublisher eventPublisher;
 
+  @Autowired
+  PasswordEncoder passwordEncoder;
+
   @RequestMapping(value = "/api/register", method = RequestMethod.POST)
   public ResponseEntity<?> saveUser(@RequestBody User user, HttpServletRequest request, Locale locale) throws Exception {
     //validate password
     if (!validation.password(user.getPassword())){
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
+    } else {
+      user.setPassword(passwordEncoder.encode(user.getPassword()));
     }
 
     //validate phone & convert phone
