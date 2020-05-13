@@ -12,8 +12,11 @@ import java.util.List;
 @Repository
 public interface TransactionMapper {
 
-    @Select("SELECT * FROM Transaction WHERE userId = #{userId} GROUP BY userId HAVING status = 'inprogress'")
-    List<Transaction> getInprogress(long userId);
+    @Select("SELECT * FROM Transaction WHERE userId = #{userId} GROUP BY userId HAVING status = 'IN_PROGRESS'")
+    List<Transaction> getInProgress(long userId);
+
+    @Select("SELECT * FROM Transaction WHERE userId = #{userId} GROUP BY userId HAVING status = 'IN_PROGRESS'")
+    List<Transaction> getCompleted(long userId);
 
     @Insert("INSERT INTO Transaction (userId, cardNumber, value, fee, status, time, method, expiry) VALUES" +
         "(#{userId}, #{cardNumber}, #{value}, #{fee}, #{status}, #{time}, #{method}, #{expiry})")

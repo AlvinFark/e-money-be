@@ -15,7 +15,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<Transaction> getInprogress(long id) {
-        return transactionMapper.getInprogress(id);
+        return transactionMapper.getInProgress(id);
     }
 
     @Override

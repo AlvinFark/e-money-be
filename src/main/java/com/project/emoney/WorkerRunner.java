@@ -2,10 +2,7 @@ package com.project.emoney;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.payload.MQRequestWrapper;
-import com.project.emoney.worker.AuthWorker;
-import com.project.emoney.worker.OTPWorker;
-import com.project.emoney.worker.TransactionWorker;
-import com.project.emoney.worker.UserWorker;
+import com.project.emoney.worker.*;
 import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +26,9 @@ public class WorkerRunner implements CommandLineRunner {
 
   @Autowired
   OTPWorker otpWorker;
+
+  @Autowired
+  TopUpWorker topUpWorker;
 
   @Autowired
   TransactionWorker transactionWorker;
@@ -81,6 +81,9 @@ public class WorkerRunner implements CommandLineRunner {
             break;
           case "register":
             response = authWorker.register(mqRequest.getMessage());
+            break;
+          case "topup-option":
+            response = topUpWorker.topUpOption();
             break;
           case "profile":
             response = userWorker.profile(mqRequest.getMessage());
