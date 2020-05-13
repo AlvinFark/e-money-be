@@ -3,6 +3,7 @@ package com.project.emoney.controller;
 
 import com.project.emoney.entity.TopUpOption;
 import com.project.emoney.mybatis.TopUpOptionService;
+import com.project.emoney.payload.ResponseWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +29,11 @@ public class TopUpOptionController {
     }
 
     //SELECT ALL TOP UP OPTION
-    @RequestMapping(value = "/getList", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/topup-option", method = RequestMethod.GET)
     public ResponseEntity<?> selectAll() {
 
         List<TopUpOption> list = topUpOptionService.getListTopUpOption();
 
-        return new ResponseEntity<>(list, HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
     }
 }
