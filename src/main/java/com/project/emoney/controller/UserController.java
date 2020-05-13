@@ -3,6 +3,7 @@ package com.project.emoney.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.User;
 import com.project.emoney.payload.ResponseWrapper;
+import com.project.emoney.payload.UserWrapper;
 import com.project.emoney.security.CurrentUser;
 import com.project.emoney.utils.RPCClient;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class UserController {
         RPCClient rpcClient = new RPCClient("profile");
         String responseMQ = rpcClient.call(userDetails.getUsername());
         User user = objectMapper.readValue(responseMQ, User.class);
-        return new ResponseEntity<>(new ResponseWrapper(200, "success", user), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseWrapper(200, "success", new UserWrapper(user)), HttpStatus.OK);
     }
 
 }
