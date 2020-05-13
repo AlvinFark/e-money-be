@@ -91,6 +91,9 @@ public class WorkerRunner implements CommandLineRunner {
           case "otp":
             response = otpWorker.send(mqRequest.getMessage());
             break;
+          case "password":
+            response = userWorker.password(mqRequest.getMessage());
+            break;
           case "transaction":
             try {
               response = transactionWorker.createTransaction(mqRequest.getMessage());
