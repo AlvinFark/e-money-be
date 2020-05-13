@@ -50,8 +50,11 @@ public class TransactionController {
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(transactionRequest));
     try {
       User user = objectMapper.readValue(responseMQ, User.class);
-      return new ResponseEntity<>(new ResponseWrapper(200, "success", user), HttpStatus.OK);
+      return new ResponseEntity<>(new ResponseWrapper(201, "success", user), HttpStatus.CREATED);
     } catch (Exception e) {
+      if (responseMQ.equals("success")) {
+        return new ResponseEntity<>(new SimpleResponseWrapper(201, "success"), HttpStatus.CREATED);
+      }
       if (responseMQ.equals("not enough balance")){
         return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.valueOf(400));
       }

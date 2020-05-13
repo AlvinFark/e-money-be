@@ -20,4 +20,15 @@ public class Transaction {
   TransactionMethod method;
   LocalDateTime time;
   LocalDateTime expiry;
+
+  public Transaction(long userId, String cardNumber, long value, long fee, Status status, TransactionMethod method, LocalDateTime time, LocalDateTime expiry) {
+    this.userId = userId;
+    this.cardNumber = cardNumber;
+    this.value = value;
+    this.fee = fee;
+    this.status = status;
+    this.method = method;
+    this.time = time;
+    this.expiry = expiry;
+  }
 }

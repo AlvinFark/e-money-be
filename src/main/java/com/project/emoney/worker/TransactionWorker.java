@@ -1,10 +1,9 @@
 package com.project.emoney.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.emoney.entity.TopUpOption;
-import com.project.emoney.entity.TransactionMethod;
-import com.project.emoney.entity.User;
+import com.project.emoney.entity.*;
 import com.project.emoney.mybatis.TopUpOptionService;
+import com.project.emoney.mybatis.TransactionService;
 import com.project.emoney.mybatis.UserService;
 import com.project.emoney.payload.TopUpRequest;
 import com.project.emoney.payload.TransactionRequest;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Component
@@ -25,6 +25,9 @@ public class TransactionWorker {
 
   @Autowired
   TopUpOptionService topUpOptionService;
+
+  @Autowired
+  TransactionService transactionService;
 
   private final OkHttpClient httpClient = new OkHttpClient();
   public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -51,12 +54,20 @@ public class TransactionWorker {
         if (!response.isSuccessful()) {
           return response.message();
         } else {
+          saveTransaction(transactionRequest, user, topUpOption, Status.COMPLETED);
           user.setBalance(user.getBalance()-topUpOption.getValue()-topUpOption.getFee());
           userService.updateBalance(user);
           return objectMapper.writeValueAsString(user);
         }
       }
     }
-    return transactionRequest.toString();
+    saveTransaction(transactionRequest, user, topUpOption, Status.IN_PROGRESS);
+    return "success";
+  }
+
+  private void saveTransaction(TransactionRequest transactionRequest, User user, TopUpOption topUpOption, Status status) {
+    Transaction transaction = new Transaction( user.getId(), transactionRequest.getCardNumber(), topUpOption.getValue(), topUpOption.getFee(),
+        status, transactionRequest.getMethod(), LocalDateTime.now().plusHours(7), LocalDateTime.now().plusHours(31));
+    transactionService.insert(transaction);
   }
 }
