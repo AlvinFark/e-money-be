@@ -8,14 +8,12 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeoutException;
 
 @Component
 @NoArgsConstructor
@@ -28,12 +26,20 @@ public class RPCClient implements AutoCloseable {
   public RPCClient(String requestQueueName) throws Exception {
     this.requestQueueName = requestQueueName;
 
-    String uri = System.getenv("CLOUDAMQP_URL");
-    if (uri == null) uri = "amqp://guest:guest@localhost";
+    final URI rabbitMqUrl;
+    try {
+      rabbitMqUrl = new URI(System.getenv("CLOUDAMQP_URL"));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setUri(uri);
-    factory.setRequestedHeartbeat(30);
-    factory.setConnectionTimeout(30);
+    factory.setUsername(rabbitMqUrl.getUserInfo().split(":")[0]);
+    factory.setPassword(rabbitMqUrl.getUserInfo().split(":")[1]);
+    factory.setHost(rabbitMqUrl.getHost());
+    factory.setPort(rabbitMqUrl.getPort());
+    factory.setVirtualHost(rabbitMqUrl.getPath().substring(1));
+
     connection = factory.newConnection();
     channel = connection.createChannel();
   }

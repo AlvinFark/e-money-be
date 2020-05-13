@@ -6,10 +6,13 @@ import com.project.emoney.entity.User;
 import com.project.emoney.mybatis.OTPService;
 import com.project.emoney.mybatis.UserService;
 import com.project.emoney.payload.LoginRequest;
+import com.project.emoney.payload.UserWithToken;
+import com.project.emoney.security.JwtTokenUtil;
 import com.project.emoney.security.JwtUserDetailsService;
 import com.project.emoney.utils.Generator;
 import com.rabbitmq.client.*;
 import com.twilio.Twilio;
+import com.twilio.exception.ApiException;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import org.slf4j.Logger;
@@ -24,7 +27,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 
 @Service
@@ -45,23 +52,35 @@ public class AuthWorker {
   @Autowired
   private Generator generator;
 
-  @Value("${phoneNumber}")
-  private String myTwilioPhoneNumber;
+  @Autowired
+  private JwtTokenUtil jwtTokenUtil;
 
-  @Value("${twilioAccountSid}")
-  private String twilioAccountSid;
+  private String myTwilioPhoneNumber = System.getenv("phoneNumber");
 
-  @Value("${twilioAuthToken}")
-  private String twilioAuthToken;
+  private String twilioAccountSid = System.getenv("twilioAccountSid");
+
+  private String twilioAuthToken = System.getenv("twilioAuthToken");
 
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   @Async("workerExecutor")
-  public void login() {
+  public void login() throws NoSuchAlgorithmException, KeyManagementException, URISyntaxException {
     final String QUEUE_NAME = "login";
+
+    final URI rabbitMqUrl;
+    try {
+      rabbitMqUrl = new URI(System.getenv("CLOUDAMQP_URL"));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost("localhost");
+    factory.setUsername(rabbitMqUrl.getUserInfo().split(":")[0]);
+    factory.setPassword(rabbitMqUrl.getUserInfo().split(":")[1]);
+    factory.setHost(rabbitMqUrl.getHost());
+    factory.setPort(rabbitMqUrl.getPort());
+    factory.setVirtualHost(rabbitMqUrl.getPath().substring(1));
 
     try (Connection connection = factory.newConnection();
          Channel channel = connection.createChannel()) {
@@ -90,20 +109,9 @@ public class AuthWorker {
           final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
           User user = userService.getUserByEmail(userDetails.getUsername());
           if (user.isActive()){
-            OTP otp = new OTP();
-            otp.setEmailOrPhone(loginRequest.getEmailOrPhone());
-            otp.setCode(generator.generateOtp());
-            otp.setTime(LocalDateTime.now());
-            otpService.create(otp);
-            Twilio.init(twilioAccountSid, twilioAuthToken);
-            Message.creator(
-                new PhoneNumber("+"+user.getPhone()),
-                new PhoneNumber(myTwilioPhoneNumber),
-                "Kode OTP: "+otp.getCode()).create();
-//            final String token = jwtTokenUtil.generateToken(userDetails);
-            response = "success, otp sent";
+            response = objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
           } else {
-            response = "inactive account, check your email or resend email verification";
+            response = sendOtp(user.getPhone());
           }
         } catch (Exception e) {
           response = "bad credentials";
@@ -127,6 +135,24 @@ public class AuthWorker {
       }
     } catch (Exception e) {
       e.printStackTrace();
+    }
+  }
+
+  private String sendOtp(String phone) {
+    try {
+      OTP otp = new OTP();
+      otp.setEmailOrPhone(phone);
+      otp.setCode(generator.generateOtp());
+      otp.setTime(LocalDateTime.now());
+      Twilio.init(twilioAccountSid, twilioAuthToken);
+      Message.creator(
+          new PhoneNumber("+"+phone),
+          new PhoneNumber(myTwilioPhoneNumber),
+          "Kode OTP: "+otp.getCode()).create();
+      otpService.create(otp);
+      return "inactive account, otp sent";
+    } catch (ApiException e) {
+      return "unverified number, can't send otp";
     }
   }
 
