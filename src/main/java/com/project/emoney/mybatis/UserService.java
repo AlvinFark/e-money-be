@@ -9,4 +9,5 @@ public interface UserService {
     User insert(User user);
     User getUserByEmail(String email);
     void setActive(String email);
+    void updateBalance(User user);
 }
