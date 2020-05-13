@@ -102,7 +102,22 @@ public class TransactionWorker {
     User user = userService.getUserByEmail(email);
 
     List<Transaction> list = transactionService.getCompleted(user.getId());
-    return objectMapper.writeValueAsString(list);
+
+    //create new list for transaction completed
+    List<Transaction> transactionList = new ArrayList<Transaction>();
+
+    for (Transaction transaction: list) {
+      LocalDateTime expiredTime = transaction.getExpiry();
+      LocalDateTime localDateTime = LocalDateTime.now();
+      int compareValue = expiredTime.compareTo(localDateTime);
+      if(compareValue < 0) {
+        //Move from in-progress
+        transactionService.updateTransaction(transaction.getId());
+        //Add to list completed
+        transactionList.add(transaction);
+      }
+    }
+    return objectMapper.writeValueAsString(transactionList);
   }
 
 

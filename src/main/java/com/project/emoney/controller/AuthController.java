@@ -57,6 +57,11 @@ public class AuthController {
       user.setPassword(passwordEncoder.encode(user.getPassword()));
     }
 
+    //validate name
+    if(!validation.name(user.getName())) {
+      return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
+    }
+
     //validate phone & convert phone
     if (!validation.phone(user.getPhone())) {
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);

@@ -16,7 +16,7 @@ public interface TransactionMapper {
     @Select("SELECT * FROM Transaction WHERE userId = #{userId} AND status = 'IN_PROGRESS'")
     List<Transaction> getInProgress(long userId);
 
-    @Select("SELECT * FROM Transaction WHERE userId = #{userId} AND status = 'COMPLETED' AND status = 'CANCELLED")
+    @Select("SELECT * FROM Transaction WHERE userId = #{userId}")
     List<Transaction> getCompleted(long userId);
 
     @Insert("INSERT INTO Transaction (userId, cardNumber, value, fee, status, time, method, expiry) VALUES" +
