@@ -1,6 +1,7 @@
 package com.project.emoney.controller;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.TopUpOption;
 import com.project.emoney.entity.User;
@@ -39,8 +40,9 @@ public class TopUpOptionController {
     @RequestMapping(value = "/api/topup-option", method = RequestMethod.GET)
     public ResponseEntity<?> selectAll() throws Exception {
         //send and receive MQ
-        RPCClient rpcClient = new RPCClient("register");
-        List<TopUpOption> list = (List<TopUpOption>) objectMapper.readerFor(TopUpOption.class);
-        return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
+        RPCClient rpcClient = new RPCClient("topup-option");
+        String responseMQ = rpcClient.call("");
+        List<TopUpOption> topUpOptions = objectMapper.readValue(responseMQ, new TypeReference<List<TopUpOption>>() {});
+        return new ResponseEntity<>(new ResponseWrapper(200, "success", topUpOptions), HttpStatus.OK);
     }
 }

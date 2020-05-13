@@ -7,6 +7,7 @@ import com.project.emoney.entity.User;
 import com.project.emoney.payload.ResponseWrapper;
 import com.project.emoney.payload.SimpleResponseWrapper;
 import com.project.emoney.payload.TransactionRequest;
+import com.project.emoney.payload.UserWrapper;
 import com.project.emoney.security.CurrentUser;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
@@ -50,7 +51,7 @@ public class TransactionController {
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(transactionRequest));
     try {
       User user = objectMapper.readValue(responseMQ, User.class);
-      return new ResponseEntity<>(new ResponseWrapper(201, "success", user), HttpStatus.CREATED);
+      return new ResponseEntity<>(new ResponseWrapper(201, "success", new UserWrapper(user)), HttpStatus.CREATED);
     } catch (Exception e) {
       if (responseMQ.equals("success")) {
         return new ResponseEntity<>(new SimpleResponseWrapper(201, "success"), HttpStatus.CREATED);

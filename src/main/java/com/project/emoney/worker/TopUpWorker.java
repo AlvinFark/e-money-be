@@ -24,7 +24,6 @@ public class TopUpWorker {
         log.info("[TopUpOption]  Receive get Top Up Option");
 
         List<TopUpOption> list = topUpOptionService.getListTopUpOption();
-        String response = objectMapper.writeValueAsString(list);
-        return response;
+        return objectMapper.writeValueAsString(list);
     }
 }
