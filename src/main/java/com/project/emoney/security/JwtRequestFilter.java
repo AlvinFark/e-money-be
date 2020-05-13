@@ -49,7 +49,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       }
     } else {
       logger.warn("JWT Token does not begin with Bearer String");
-      System.out.println(request.getRequestURI());
       if (!request.getRequestURI().equals("/api/login")&&!request.getRequestURI().equals("/api/register")){
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponseWrapper(HttpStatus.UNAUTHORIZED.value(),"no token")));

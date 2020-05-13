@@ -111,12 +111,8 @@ public class AuthWorker {
           if (user.isActive()){
             response = objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
           } else {
-            sendOtp(user.getPhone());
-            response = "inactive account, otp sent";
+            response = sendOtp(user.getPhone());
           }
-        } catch (ApiException e) {
-          e.printStackTrace();
-          response = "unverified number";
         } catch (Exception e) {
           response = "bad credentials";
         }
@@ -143,17 +139,21 @@ public class AuthWorker {
   }
 
   private String sendOtp(String phone) {
-    OTP otp = new OTP();
-    otp.setEmailOrPhone(phone);
-    otp.setCode(generator.generateOtp());
-    otp.setTime(LocalDateTime.now());
-    Twilio.init(twilioAccountSid, twilioAuthToken);
-    Message.creator(
-        new PhoneNumber("+"+phone),
-        new PhoneNumber(myTwilioPhoneNumber),
-        "Kode OTP: "+otp.getCode()).create();
-    otpService.create(otp);
-    return "otp sent";
+    try {
+      OTP otp = new OTP();
+      otp.setEmailOrPhone(phone);
+      otp.setCode(generator.generateOtp());
+      otp.setTime(LocalDateTime.now());
+      Twilio.init(twilioAccountSid, twilioAuthToken);
+      Message.creator(
+          new PhoneNumber("+"+phone),
+          new PhoneNumber(myTwilioPhoneNumber),
+          "Kode OTP: "+otp.getCode()).create();
+      otpService.create(otp);
+      return "inactive account, otp sent";
+    } catch (ApiException e) {
+      return "unverified number, can't send otp";
+    }
   }
 
   private void authenticate(String username, String password) throws Exception {
