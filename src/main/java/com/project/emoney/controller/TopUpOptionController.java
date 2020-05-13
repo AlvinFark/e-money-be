@@ -1,8 +1,14 @@
 package com.project.emoney.controller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.TopUpOption;
+import com.project.emoney.entity.User;
 import com.project.emoney.mybatis.TopUpOptionService;
+import com.project.emoney.payload.ResponseWrapper;
+import com.project.emoney.payload.SimpleResponseWrapper;
+import com.project.emoney.security.CurrentUser;
+import com.project.emoney.utils.RPCClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +24,8 @@ public class TopUpOptionController {
     @Autowired
     private TopUpOptionService topUpOptionService;
 
+    ObjectMapper objectMapper = new ObjectMapper();
+
     //CREATE TOP UP OPTION
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ResponseEntity<?> create(@RequestBody TopUpOption topUpOption) {
@@ -28,11 +36,11 @@ public class TopUpOptionController {
     }
 
     //SELECT ALL TOP UP OPTION
-    @RequestMapping(value = "/getList", method = RequestMethod.GET)
-    public ResponseEntity<?> selectAll() {
-
-        List<TopUpOption> list = topUpOptionService.getListTopUpOption();
-
-        return new ResponseEntity<>(list, HttpStatus.OK);
+    @RequestMapping(value = "/api/topup-option", method = RequestMethod.GET)
+    public ResponseEntity<?> selectAll() throws Exception {
+        //send and receive MQ
+        RPCClient rpcClient = new RPCClient("register");
+        List<TopUpOption> list = (List<TopUpOption>) objectMapper.readerFor(TopUpOption.class);
+        return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
     }
 }
