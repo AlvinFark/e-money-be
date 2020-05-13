@@ -5,6 +5,13 @@ spring:
     username: b256b206ac8263
     password: 7f7b13ed
 
+#spring:
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/emoney?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
+#    driver: com.mysql.cj.jdbc.Driver
+#    username: root
+#    password: jljlkl890090
+
     hikari:
       maximum-pool-size: 10
 
@@ -13,4 +20,6 @@ jwt:
 
 phoneNumber: +12058439958
 twilioAccountSid: ACc9524830957a04cfdc9851c0392aacb9
-twilioAuthToken: bbd1db31c71005c084587ef4c708a52f
+twilioAuthToken: 80d5a54ff172be4509222ebbd9239b33
+CLOUDAMQP_URL: amqp://wmaqowtk:SFX4rWejOk-3zCznHjw0PJZFFwHnqath@zebra.rmq.cloudamqp.com/wmaqowtk
+userMQ: nabila

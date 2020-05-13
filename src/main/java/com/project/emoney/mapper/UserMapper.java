@@ -19,4 +19,7 @@ public interface UserMapper {
 
     @Insert("INSERT INTO user (name, email, phone, password, balance, active) VALUES (#{name}, #{email}, #{phone}, #{password}, 0, false)")
     void insert(User user);
+
+    @Select("UPDATE user SET active = true WHERE id = #{id}")
+    void activateUser(User user);
 }
