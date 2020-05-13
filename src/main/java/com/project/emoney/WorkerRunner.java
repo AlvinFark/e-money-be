@@ -1,6 +1,7 @@
 package com.project.emoney;
 
 import com.project.emoney.worker.AuthWorker;
+import com.project.emoney.worker.OTPWorker;
 import com.project.emoney.worker.UserWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -15,10 +16,14 @@ public class WorkerRunner implements CommandLineRunner {
   @Autowired
   UserWorker userWorker;
 
+  @Autowired
+  OTPWorker otpWorker;
+
   @Override
   public void run(String... args) throws Exception {
     authWorker.login();
-    authWorker.login();
-    userWorker.profile();
+//    authWorker.login();
+//    userWorker.profile();
+    otpWorker.send();
   }
 }
