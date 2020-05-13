@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/top-up")
 public class TopUpOptionController {
     @Autowired
     private TopUpOptionService topUpOptionService;

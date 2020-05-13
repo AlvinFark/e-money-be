@@ -79,6 +79,9 @@ public class WorkerRunner implements CommandLineRunner {
           case "login":
             response = authWorker.login(mqRequest.getMessage());
             break;
+          case "register":
+            response = authWorker.register(mqRequest.getMessage());
+            break;
           case "profile":
             response = userWorker.profile(mqRequest.getMessage());
             break;

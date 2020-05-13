@@ -62,6 +62,18 @@ public class AuthWorker {
   ObjectMapper objectMapper = new ObjectMapper();
   private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
+  public String register(String message) throws JsonProcessingException {
+    User user = objectMapper.readValue(message, User.class);
+    log.info("[register]  Receive register request for email: " + user.getEmail());
+    log.info("[register]  Receive register request for phone: " + user.getPhone());
+    try {
+      userService.insert(user);
+      return sendOtp(user.getPhone());
+    } catch (Exception e) {
+      return "bad credentials";
+    }
+  }
+
   public String login(String message) throws JsonProcessingException {
       LoginRequest loginRequest = objectMapper.readValue(message, LoginRequest.class);
       log.info("[login]  Receive login request for email or phone: " + loginRequest.getEmailOrPhone());
