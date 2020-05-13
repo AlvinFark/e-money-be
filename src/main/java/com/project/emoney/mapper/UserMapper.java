@@ -23,6 +23,9 @@ public interface UserMapper {
     @Update("UPDATE USER SET active = TRUE WHERE email = #{email}")
     void setActive(String email);
 
+    @Update("UPDATE USER SET balance = #{balance} WHERE email = #{email}")
+    void updateBalance(User user);
+
     @Select("UPDATE user SET active = true WHERE id = #{id}")
     void activateUser(User user);
 }

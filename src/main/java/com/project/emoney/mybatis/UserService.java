@@ -11,6 +11,7 @@ public interface UserService {
 
     User insert(User user);
     void setActive(String email);
+    void updateBalance(User user);
     void createVerificationToken(User user, String token);
     EmailToken getVerificationToken(String VerificationToken);
 

@@ -9,4 +9,5 @@ public interface TopUpOptionService {
 
     void createTopUpOption(TopUpOption topUpOption);
     List<TopUpOption> getListTopUpOption();
+    TopUpOption getById(long id);
 }

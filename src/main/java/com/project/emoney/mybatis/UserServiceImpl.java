@@ -43,6 +43,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public void updateBalance(User user) {
+        userMapper.updateBalance(user);
+    }
+
+    @Override
     public void createVerificationToken(User user, String token) {
         EmailToken newUserToken = new EmailToken(token, user);
         emailTokenMapper.createToken(newUserToken);

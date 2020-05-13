@@ -22,4 +22,9 @@ public class TopUpOptionServiceImpl implements TopUpOptionService {
     public List<TopUpOption> getListTopUpOption() {
         return topUpOptionMapper.getAllTopUpOption();
     }
+
+    @Override
+    public TopUpOption getById(long id) {
+        return topUpOptionMapper.getById(id);
+    }
 }

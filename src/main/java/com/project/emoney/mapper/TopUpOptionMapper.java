@@ -17,4 +17,7 @@ public interface TopUpOptionMapper {
 
     @Insert("INSERT INTO TopUpOption (value, fee) VALUES (#{value}, #{fee})")
     void createTopUpOption(TopUpOption topUpOption);
+
+    @Select("SELECT * FROM TopUpOption WHERE id = #{id}")
+    TopUpOption getById(long id);
 }
