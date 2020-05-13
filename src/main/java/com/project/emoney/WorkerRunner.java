@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.payload.MQRequestWrapper;
 import com.project.emoney.worker.AuthWorker;
 import com.project.emoney.worker.OTPWorker;
+import com.project.emoney.worker.TransactionWorker;
 import com.project.emoney.worker.UserWorker;
 import com.rabbitmq.client.*;
 import org.slf4j.Logger;
@@ -28,6 +29,9 @@ public class WorkerRunner implements CommandLineRunner {
 
   @Autowired
   OTPWorker otpWorker;
+
+  @Autowired
+  TransactionWorker transactionWorker;
 
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
@@ -81,6 +85,12 @@ public class WorkerRunner implements CommandLineRunner {
           case "otp":
             response = otpWorker.send(mqRequest.getMessage());
             break;
+          case "transaction":
+            try {
+              response = transactionWorker.createTransaction(mqRequest.getMessage());
+            } catch (Exception e) {
+              response = "e-money server unreachable";
+            }
         }
 
         channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.getBytes(StandardCharsets.UTF_8));

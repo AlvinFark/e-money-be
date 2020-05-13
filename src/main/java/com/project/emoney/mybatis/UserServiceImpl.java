@@ -35,4 +35,9 @@ public class UserServiceImpl implements UserService{
     public void setActive(String email) {
         userMapper.setActive(email);
     }
+
+    @Override
+    public void updateBalance(User user) {
+        userMapper.updateBalance(user);
+    }
 }
