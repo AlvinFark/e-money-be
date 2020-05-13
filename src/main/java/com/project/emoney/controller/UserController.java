@@ -3,9 +3,13 @@ package com.project.emoney.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.User;
 import com.project.emoney.payload.ResponseWrapper;
+import com.project.emoney.payload.SimpleResponseWrapper;
+import com.project.emoney.payload.UserWithToken;
 import com.project.emoney.payload.UserWrapper;
 import com.project.emoney.security.CurrentUser;
 import com.project.emoney.utils.RPCClient;
+import com.project.emoney.utils.Validation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +18,28 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class UserController {
 
-    ObjectMapper objectMapper = new ObjectMapper();
+  ObjectMapper objectMapper = new ObjectMapper();
 
-    @GetMapping("/profile")
-    public ResponseEntity<?> loadProfile(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
-        RPCClient rpcClient = new RPCClient("profile");
-        String responseMQ = rpcClient.call(userDetails.getUsername());
-        User user = objectMapper.readValue(responseMQ, User.class);
-        return new ResponseEntity<>(new ResponseWrapper(200, "success", new UserWrapper(user)), HttpStatus.OK);
+  @Autowired
+  Validation validation;
+
+  @GetMapping("/profile")
+  public ResponseEntity<?> loadProfile(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
+    RPCClient rpcClient = new RPCClient("profile");
+    String responseMQ = rpcClient.call(userDetails.getUsername());
+    User user = objectMapper.readValue(responseMQ, User.class);
+    return new ResponseEntity<>(new ResponseWrapper(200, "success", new UserWrapper(user)), HttpStatus.OK);
+  }
+
+  @PutMapping("/password")
+  public ResponseEntity<?> updatePassword(@CurrentUser org.springframework.security.core.userdetails.User userDetails, @RequestBody User request) throws Exception {
+    if (!validation.password(request.getPassword())){
+      return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad credentials"), HttpStatus.BAD_REQUEST);
     }
+    RPCClient rpcClient = new RPCClient("password");
+    request.setEmail(userDetails.getUsername());
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(request));
+    return new ResponseEntity<>(new SimpleResponseWrapper(200, responseMQ), HttpStatus.OK);
+  }
 
 }

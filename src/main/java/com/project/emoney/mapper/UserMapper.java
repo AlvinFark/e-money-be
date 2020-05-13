@@ -28,4 +28,7 @@ public interface UserMapper {
 
     @Select("UPDATE user SET active = true WHERE id = #{id}")
     void activateUser(User user);
+
+    @Update("UPDATE user SET password = #{password} WHERE email = #{email}")
+    void updatePassword(User user);
 }
