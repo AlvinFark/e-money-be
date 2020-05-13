@@ -1,5 +1,6 @@
 package com.project.emoney.security;
 import java.io.IOException;
+import java.sql.SQLSyntaxErrorException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -56,18 +58,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 // Once we get the token validate it.
     if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
-// if token is valid configure Spring Security to manually set
-// authentication
-      if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-            userDetails, null, userDetails.getAuthorities());
-        usernamePasswordAuthenticationToken
-            .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-// After setting the Authentication in the context, we specify
-// that the current user is authenticated. So it passes the
-// Spring Security Configurations successfully.
-        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+      try {
+        UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
+        if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+          UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+              userDetails, null, userDetails.getAuthorities());
+          usernamePasswordAuthenticationToken
+              .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+          SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        }
+      } catch (Exception e) {
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+        response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponseWrapper(HttpStatus.TOO_MANY_REQUESTS.value(),"too many connections")));
       }
     }
     chain.doFilter(request, response);
