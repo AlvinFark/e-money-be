@@ -7,8 +7,10 @@ import java.util.List;
 
 public interface TransactionService {
 
+    Transaction getById(long id);
     List<Transaction> getInProgressByUserId(long id);
     List<Transaction> getAllByUserId(long id);
     void insert(Transaction transaction);
     void updateStatusById(long id, Status status);
+    void setExtensionById(long id, String extension);
 }
