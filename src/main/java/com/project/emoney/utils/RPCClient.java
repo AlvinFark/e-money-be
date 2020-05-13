@@ -47,6 +47,8 @@ public class RPCClient implements AutoCloseable {
   }
 
   public String call(String message) throws IOException, InterruptedException {
+//    System.out.println(message);
+//    System.out.println(requestQueueName);
     final String corrId = UUID.randomUUID().toString();
 
     String replyQueueName = channel.queueDeclare().getQueue();
@@ -59,7 +61,8 @@ public class RPCClient implements AutoCloseable {
     ObjectMapper objectMapper = new ObjectMapper();
     MQRequestWrapper mqRequestWrapper = new MQRequestWrapper(requestQueueName,message);
     String messageWithQueue = objectMapper.writeValueAsString(mqRequestWrapper);
-    channel.basicPublish("", "worker", props, messageWithQueue.getBytes(StandardCharsets.UTF_8));
+//    System.out.println(messageWithQueue);
+    channel.basicPublish("", System.getenv("userMQ"), props, messageWithQueue.getBytes(StandardCharsets.UTF_8));
 
     final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
 

@@ -39,7 +39,6 @@ public class OTPWorker {
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
-  @Async("workerExecutor")
   public String send(String message) throws JsonProcessingException {
     OTPRequest otpRequest = objectMapper.readValue(message, OTPRequest.class);
     log.info("[otp]  Receive otp verification request for email or phone: " + otpRequest.getEmailOrPhone());
