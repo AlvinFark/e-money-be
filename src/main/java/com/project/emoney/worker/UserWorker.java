@@ -1,5 +1,6 @@
 package com.project.emoney.worker;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.User;
 import com.project.emoney.mybatis.UserService;
@@ -25,66 +26,13 @@ public class UserWorker {
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
-  @Async("workerExecutor")
-  public void profile() {
-    final String QUEUE_NAME = "profile";
+  public String profile(String message) throws JsonProcessingException {
+    String email = message;
 
-    final URI rabbitMqUrl;
-    try {
-      rabbitMqUrl = new URI(System.getenv("CLOUDAMQP_URL"));
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    }
+    log.info("[profile]  Receive reload profile for email: " + email);
+    User user = userService.getUserByEmail(email);
+    String response = objectMapper.writeValueAsString(user);
 
-    ConnectionFactory factory = new ConnectionFactory();
-    factory.setUsername(rabbitMqUrl.getUserInfo().split(":")[0]);
-    factory.setPassword(rabbitMqUrl.getUserInfo().split(":")[1]);
-    factory.setHost(rabbitMqUrl.getHost());
-    factory.setPort(rabbitMqUrl.getPort());
-    factory.setVirtualHost(rabbitMqUrl.getPath().substring(1));
-
-    try (Connection connection = factory.newConnection();
-         Channel channel = connection.createChannel()) {
-      channel.queueDeclare(QUEUE_NAME, true, false, false, null);
-      channel.queuePurge(QUEUE_NAME);
-
-      channel.basicQos(1);
-
-      log.info("[profile]  Awaiting reload profile requests");
-
-      Object monitor = new Object();
-      DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-        AMQP.BasicProperties replyProps = new AMQP.BasicProperties
-            .Builder()
-            .correlationId(delivery.getProperties().getCorrelationId())
-            .build();
-
-        String response = "";
-
-        String email = new String(delivery.getBody(), StandardCharsets.UTF_8);
-        log.info("[profile]  Receive reload profile for email: " + email);
-        User user = userService.getUserByEmail(email);
-        response = objectMapper.writeValueAsString(user);
-
-        channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.getBytes(StandardCharsets.UTF_8));
-        channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-        synchronized (monitor) {
-          monitor.notify();
-        }
-      };
-
-      channel.basicConsume(QUEUE_NAME, false, deliverCallback, (consumerTag -> { }));
-      while (true) {
-        synchronized (monitor) {
-          try {
-            monitor.wait();
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    return response;
   }
 }
