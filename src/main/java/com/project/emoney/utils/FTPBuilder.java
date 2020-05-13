@@ -31,6 +31,10 @@ public class FTPBuilder {
         this.ftp.storeFile(hostDir + fileName, file.getInputStream());
     }
 
+    public void deleteFile(String filename) throws IOException {
+        ftp.deleteFile(filename);
+    }
+
     public void disconnect() {
         if (this.ftp.isConnected()) {
             try {
