@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 @Component
@@ -76,7 +78,23 @@ public class TransactionWorker {
     User user = userService.getUserByEmail(email);
 
     List<Transaction> list = transactionService.getInProgress(user.getId());
-    return objectMapper.writeValueAsString(list);
+
+    //create new list for transaction in-progress
+    List<Transaction> transactionList = new ArrayList<Transaction>();
+
+    for (Transaction transaction: list) {
+        LocalDateTime expiredTime = transaction.getExpiry();
+        LocalDateTime localDateTime = LocalDateTime.now();
+        int compareValue = expiredTime.compareTo(localDateTime);
+        if(compareValue > 0) {
+          //Add to list in-progress
+          transactionList.add(transaction);
+        } else {
+          //Move from in-progress
+          transactionService.updateTransaction(transaction.getId());
+        }
+    }
+    return objectMapper.writeValueAsString(transactionList);
   }
 
   public String transactionCompleted(String message) throws JsonProcessingException {

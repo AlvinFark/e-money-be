@@ -9,4 +9,5 @@ public interface TransactionService {
     List<Transaction> getInProgress(long id);
     List<Transaction> getCompleted(long id);
     void insert(Transaction transaction);
+    void updateTransaction(long id);
 }

@@ -27,4 +27,9 @@ public class TransactionServiceImpl implements TransactionService {
     public void insert(Transaction transaction) {
         transactionMapper.insert(transaction);
     }
+
+    @Override
+    public void updateTransaction(long id) {
+        transactionMapper.updateTransaction(id);
+    }
 }
