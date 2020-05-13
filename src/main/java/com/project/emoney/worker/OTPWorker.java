@@ -51,19 +51,20 @@ public class OTPWorker {
       }
       //cek master key, master key untuk kebutuhan fe qa
       if (otpRequest.getCode().equals("6666")) {
+        userService.setActive(user.getEmail());
         return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
       }
       OTP otp = otpService.getByCodeOrderByTimeDesc(otpRequest.getCode());
       //cek jika otp null atau otp bukan punya user tersebut
-      if (otp == null || (!(otp.getEmailOrPhone().equals(user.getEmail()) || otp.getEmailOrPhone().equals(user.getPassword())))) {
+      if (otp == null || (!otp.getEmailOrPhone().equals(user.getEmail())&&!otp.getEmailOrPhone().equals(user.getPhone()))) {
         return "invalid code";
       }
       //bukan master key dan lebih dari batas waktu
-      if (otp.getTime().plusMinutes(2).isAfter(LocalDateTime.now())) {
-        System.out.println(otp.getTime().plusMinutes(2));
-        System.out.println(LocalDateTime.now());
+      if (otp.getTime().plusMinutes(2).isBefore(LocalDateTime.now())) {
         return "code expired";
       }
+      //return dan set active
+      userService.setActive(user.getEmail());
       return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
     } catch (UsernameNotFoundException e) {
       return "user not found";
