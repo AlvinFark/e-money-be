@@ -1,8 +1,10 @@
 package com.project.emoney.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.User;
+import com.project.emoney.payload.ResponseWrapper;
 import com.project.emoney.payload.SimpleResponseWrapper;
 import com.project.emoney.payload.LoginRequest;
+import com.project.emoney.payload.UserWithToken;
 import com.project.emoney.security.JwtUserDetailsService;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
@@ -50,12 +52,15 @@ public class AuthController {
     RPCClient rpcClient = new RPCClient("login");
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
     //translate MQ response
-    if (responseMQ.equals("success")){
-      return new ResponseEntity<>(new SimpleResponseWrapper(201, responseMQ), HttpStatus.OK);
-    } else if (responseMQ.equals("bad credentials")) {
+    if (responseMQ.equals("bad credentials")) {
       return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
+    } else if (responseMQ.equals("inactive account, otp sent")) {
+      return new ResponseEntity<>(new SimpleResponseWrapper(403, responseMQ), HttpStatus.FORBIDDEN);
+    } else if (responseMQ.equals("unverified number, can't send otp")) {
+      return new ResponseEntity<>(new SimpleResponseWrapper(500, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
     } else {
-      return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
+      UserWithToken userWithToken = objectMapper.readValue(responseMQ, UserWithToken.class);
+      return new ResponseEntity<>(new ResponseWrapper(201, "success", userWithToken), HttpStatus.OK);
     }
   }
 }
