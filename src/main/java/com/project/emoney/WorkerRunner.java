@@ -34,7 +34,7 @@ public class WorkerRunner implements CommandLineRunner {
 
   @Async("workerExecutor")
   public void runner() {
-    final String QUEUE_NAME = "worker";
+    final String QUEUE_NAME = System.getenv("userMQ");
 
     final URI rabbitMqUrl;
     try {

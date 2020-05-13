@@ -19,9 +19,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Service
@@ -42,7 +39,6 @@ public class OTPWorker {
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
-  @Async("workerExecutor")
   public String send(String message) throws JsonProcessingException {
     OTPRequest otpRequest = objectMapper.readValue(message, OTPRequest.class);
     log.info("[otp]  Receive otp verification request for email or phone: " + otpRequest.getEmailOrPhone());
