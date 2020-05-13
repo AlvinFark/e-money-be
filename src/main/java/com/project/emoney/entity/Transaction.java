@@ -19,6 +19,7 @@ public class Transaction {
   TransactionMethod method;
   LocalDateTime time;
   LocalDateTime expiry;
+  String imagePath;
 
   public Transaction(long userId, String cardNumber, long value, long fee, Status status, TransactionMethod method, LocalDateTime time, LocalDateTime expiry) {
     this.userId = userId;

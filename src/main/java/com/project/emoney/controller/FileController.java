@@ -43,6 +43,9 @@ public class FileController {
       String extension = file.getOriginalFilename().split("\\.")[file.getOriginalFilename().split("\\.").length-1];
       FTPBuilder ftp = new FTPBuilder(System.getenv("ftpserver"),
           System.getenv("ftpusername"),System.getenv("ftppassword"));
+      if (transaction.getImagePath()!=null){
+        ftp.deleteFile("/bukti-transfer/"+idTransaction+"."+transaction.getImagePath());
+      }
       ftp.uploadFile(file, idTransaction+"."+extension, "/bukti-transfer/");
       transactionService.setExtensionById(idTransaction, extension);
     } catch (Exception e) {
