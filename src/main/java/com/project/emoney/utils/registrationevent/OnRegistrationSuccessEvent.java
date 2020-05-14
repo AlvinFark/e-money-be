@@ -1,4 +1,4 @@
-package com.project.emoney.registrationevent;
+package com.project.emoney.utils.registrationevent;
 
 import com.project.emoney.entity.User;
 import org.springframework.context.ApplicationEvent;

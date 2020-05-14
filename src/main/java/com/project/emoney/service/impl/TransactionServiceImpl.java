@@ -1,8 +1,9 @@
-package com.project.emoney.mybatis;
+package com.project.emoney.service.impl;
 
 import com.project.emoney.entity.Status;
 import com.project.emoney.entity.Transaction;
 import com.project.emoney.mapper.TransactionMapper;
+import com.project.emoney.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -2,13 +2,11 @@ package com.project.emoney.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.EmailToken;
 import com.project.emoney.entity.User;
-import com.project.emoney.payload.ResponseWrapper;
-import com.project.emoney.mybatis.UserService;
-import com.project.emoney.payload.SimpleResponseWrapper;
-import com.project.emoney.payload.LoginRequest;
-import com.project.emoney.payload.UserWithToken;
-import com.project.emoney.registrationevent.OnRegistrationSuccessEvent;
-import com.project.emoney.security.JwtUserDetailsService;
+import com.project.emoney.payload.response.ResponseWrapper;
+import com.project.emoney.service.UserService;
+import com.project.emoney.payload.response.SimpleResponseWrapper;
+import com.project.emoney.payload.request.LoginRequest;
+import com.project.emoney.payload.dto.UserWithToken;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,27 +15,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Calendar;
 import java.util.Locale;
 
 @RestController
 @CrossOrigin
 public class AuthController {
 
-  @Autowired
-  private JwtUserDetailsService userDetailsService;
-
   ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired
   Validation validation;
-
-  @Autowired
-  private ServletContext context;
 
   @Autowired
   private UserService userService;
@@ -77,6 +66,7 @@ public class AuthController {
     //send and receive MQ
     RPCClient rpcClient = new RPCClient("register");
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(user));
+
     //translate MQ response
     switch (responseMQ) {
       case "inactive account, otp sent":
@@ -95,26 +85,6 @@ public class AuthController {
       default:
         return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
     }
-    }
-
-  @RequestMapping(value = "/confirmRegistration", method = RequestMethod.GET)
-  public String confirmRegistration(WebRequest request, @RequestParam("token") String token) {
-
-    Locale locale = request.getLocale();
-    EmailToken verificationToken = userService.getVerificationToken(token);
-    if(verificationToken == null) {
-      return "redirect:access-denied";
-    }
-
-    User user = verificationToken.getUser();
-    Calendar calendar = Calendar.getInstance();
-    if((verificationToken.getExpiryDate().getTime()-calendar.getTime().getTime())<=0) {
-      return "redirect:access-denied";
-    }
-
-    user.setActive(true);
-    userService.activateUser(user);
-    return null;
   }
 
   @RequestMapping(value = "/api/login", method = RequestMethod.POST)
