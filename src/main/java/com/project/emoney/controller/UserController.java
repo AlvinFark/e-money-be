@@ -8,6 +8,7 @@ import com.project.emoney.payload.dto.UserWrapper;
 import com.project.emoney.security.CurrentUser;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
+import com.project.emoney.worker.UserWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,16 @@ public class UserController {
   @Autowired
   Validation validation;
 
+  @Autowired
+  UserWorker userWorker;
+
   //reload profile, for checking balance etc
   @GetMapping("/profile")
   public ResponseEntity<?> loadProfile(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
-    RPCClient rpcClient = new RPCClient("profile");
-    String responseMQ = rpcClient.call(userDetails.getUsername());
-    User user = objectMapper.readValue(responseMQ, User.class);
+//    RPCClient rpcClient = new RPCClient("profile");
+//    String responseMQ = rpcClient.call(userDetails.getUsername());
+//    User user = objectMapper.readValue(responseMQ, User.class);
+    User user = objectMapper.readValue(userWorker.profile(userDetails.getUsername()), User.class);
     return new ResponseEntity<>(new ResponseWrapper(200, "success", new UserWrapper(user)), HttpStatus.OK);
   }
 
@@ -37,9 +42,10 @@ public class UserController {
     if (!validation.password(request.getPassword())){
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad credentials"), HttpStatus.BAD_REQUEST);
     }
-    RPCClient rpcClient = new RPCClient("password");
+//    RPCClient rpcClient = new RPCClient("password");
     request.setEmail(userDetails.getUsername());
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(request));
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(request));
+    String responseMQ = userWorker.password(objectMapper.writeValueAsString(request));
     return new ResponseEntity<>(new SimpleResponseWrapper(200, responseMQ), HttpStatus.OK);
   }
 

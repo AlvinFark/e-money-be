@@ -15,7 +15,8 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
 @Component
-public class WorkerRunner implements CommandLineRunner {
+public class WorkerRunner {
+//public class WorkerRunner implements CommandLineRunner {
 
   @Autowired
   AuthWorker authWorker;
@@ -123,8 +124,8 @@ public class WorkerRunner implements CommandLineRunner {
     }
   }
 
-  @Override
-  public void run(String... args) {
-    runner();
-  }
+//  @Override
+//  public void run(String... args) {
+//    runner();
+//  }
 }
