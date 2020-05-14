@@ -24,7 +24,7 @@ public class Validation {
     try {
       Long.parseLong(card);
       return true;
-    } catch (Exception e) {
+    } catch (NumberFormatException e) {
       return false;
     }
   }
@@ -45,7 +45,7 @@ public class Validation {
     }
   }
 
-  public boolean phone (String phone) {
+  public boolean phone(String phone) {
     if (phone.length()<10||phone.length()>14){
       return false;
     }
