@@ -33,11 +33,8 @@ public class TopUpOptionController {
 
     @RequestMapping(value = "/api/topup-option", method = RequestMethod.GET)
     public ResponseEntity<?> selectAll() throws Exception {
-        //send and receive MQ, no message, empty string just to notify MQ
-        RPCClient rpcClient = new RPCClient("topup-option");
-        String responseMQ = rpcClient.call("");
-        //deserialize and return list
-        List<TopUpOption> topUpOptions = objectMapper.readValue(responseMQ, new TypeReference<List<TopUpOption>>() {});
-        return new ResponseEntity<>(new ResponseWrapper(200, "success", topUpOptions), HttpStatus.OK);
+        //direct connection without MQ
+        List<TopUpOption> list = topUpOptionService.getListTopUpOption();
+        return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
     }
 }
