@@ -30,6 +30,15 @@ public class OTPController {
     if (!validation.otp(otpRequest.getCode())){
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid code"), HttpStatus.BAD_REQUEST);
     }
+
+    //validate email & convert phone & validate phone
+    if (!validation.email(otpRequest.getEmailOrPhone())){
+      otpRequest.setEmailOrPhone(validation.convertPhone(otpRequest.getEmailOrPhone()));
+      if (!validation.phone(otpRequest.getEmailOrPhone())) {
+        return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
+      }
+    }
+
     //send and receive MQ
     RPCClient rpcClient = new RPCClient("otp");
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(otpRequest));
