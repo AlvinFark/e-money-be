@@ -2,7 +2,9 @@ package com.project.emoney.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.emoney.entity.Transaction;
 import com.project.emoney.entity.User;
+import com.project.emoney.payload.request.CancelRequest;
 import com.project.emoney.payload.response.ResponseWrapper;
 import com.project.emoney.payload.response.SimpleResponseWrapper;
 import com.project.emoney.payload.dto.TransactionDTO;
@@ -27,6 +29,25 @@ public class TransactionController {
 
   @Autowired
   Validation validation;
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<?> cancel(
+      @CurrentUser org.springframework.security.core.userdetails.User userDetails,
+      @PathVariable long id) throws Exception {
+    CancelRequest cancelRequest = new CancelRequest(id, userDetails.getUsername());
+    RPCClient rpcClient = new RPCClient("cancelTransaction");
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(cancelRequest));
+    switch (responseMQ) {
+      case "success":
+        return new ResponseEntity<>(new SimpleResponseWrapper(200, responseMQ), HttpStatus.OK);
+      case "can't cancel completed transaction":
+        return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
+      case "transaction not found":
+        return new ResponseEntity<>(new SimpleResponseWrapper(404, responseMQ), HttpStatus.NOT_FOUND);
+      default:
+        return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
+    }
+  }
 
   @PostMapping
   public ResponseEntity<?> createTransaction(
