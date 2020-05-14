@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLSyntaxErrorException;
 import java.time.LocalDateTime;
 
 @Service
@@ -70,6 +71,8 @@ public class OTPWorker {
       return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
     } catch (UsernameNotFoundException e) {
       return "user not found";
+    } catch (Exception e) {
+      return "too many connections";
     }
   }
 }
