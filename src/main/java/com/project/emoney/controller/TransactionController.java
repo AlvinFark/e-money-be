@@ -31,13 +31,17 @@ public class TransactionController {
   @Autowired
   Validation validation;
 
+  @Autowired
+  TransactionWorker transactionWorker;
+
   @DeleteMapping("/{id}")
   public ResponseEntity<?> cancel(
       @CurrentUser org.springframework.security.core.userdetails.User userDetails,
       @PathVariable long id) throws Exception {
     CancelRequest cancelRequest = new CancelRequest(id, userDetails.getUsername());
-    RPCClient rpcClient = new RPCClient("cancelTransaction");
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(cancelRequest));
+//    RPCClient rpcClient = new RPCClient("cancelTransaction");
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(cancelRequest));
+    String responseMQ = transactionWorker.cancel(objectMapper.writeValueAsString(cancelRequest));
     switch (responseMQ) {
       case "success":
         return new ResponseEntity<>(new SimpleResponseWrapper(200, responseMQ), HttpStatus.OK);
@@ -49,9 +53,6 @@ public class TransactionController {
         return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
     }
   }
-
-  @Autowired
-  TransactionWorker transactionWorker;
 
   @PostMapping
   public ResponseEntity<?> createTransaction(
