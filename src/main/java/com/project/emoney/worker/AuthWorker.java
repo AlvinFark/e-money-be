@@ -26,6 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLSyntaxErrorException;
 import java.time.LocalDateTime;
 
 @Service
@@ -80,11 +81,13 @@ public class AuthWorker {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
         User user = userService.getUserByEmail(userDetails.getUsername());
         //if already acive, then return token
-        if (user.isActive()){
+        if (user.isActive()) {
           return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
         }
         //if inactive, send otp
         return sendOtp(user.getPhone());
+      } catch (SQLSyntaxErrorException e) {
+        return "too many connections";
       } catch (Exception e) {
         return "bad credentials";
       }
