@@ -1,7 +1,7 @@
 package com.project.emoney.security;
 
 import com.project.emoney.entity.User;
-import com.project.emoney.mybatis.UserService;
+import com.project.emoney.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

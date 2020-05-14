@@ -11,6 +11,7 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class ExecutorConfig {
 
+  //executor for MQ workers
   @Bean(name = "workerExecutor")
   public Executor workerExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

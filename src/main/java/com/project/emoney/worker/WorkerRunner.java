@@ -1,7 +1,7 @@
-package com.project.emoney;
+package com.project.emoney.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.emoney.payload.MQRequestWrapper;
+import com.project.emoney.payload.dto.MQRequestWrapper;
 import com.project.emoney.worker.*;
 import com.rabbitmq.client.*;
 import org.slf4j.Logger;

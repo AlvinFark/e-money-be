@@ -1,7 +1,8 @@
-package com.project.emoney.registrationevent;
+package com.project.emoney.utils.registrationevent;
 
 import com.project.emoney.entity.User;
-import com.project.emoney.mybatis.UserService;
+import com.project.emoney.service.EmailTokenService;
+import com.project.emoney.service.UserService;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationS
     private UserService userService;
 
     @Autowired
+    private EmailTokenService emailTokenService;
+
+    @Autowired
     private MessageSource messages;
 
     @Autowired
@@ -32,7 +36,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationS
     private void confirmRegistration(OnRegistrationSuccessEvent event) {
         User user = event.getUser();
         String token = UUID.randomUUID().toString();
-        userService.createVerificationToken(user,token);
+        emailTokenService.createVerificationToken(user,token);
 
         String recipient = user.getEmail();
         String subject = "Registration Confirmation";

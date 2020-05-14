@@ -2,10 +2,9 @@ package com.project.emoney.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.User;
-import com.project.emoney.payload.ResponseWrapper;
-import com.project.emoney.payload.SimpleResponseWrapper;
-import com.project.emoney.payload.UserWithToken;
-import com.project.emoney.payload.UserWrapper;
+import com.project.emoney.payload.response.ResponseWrapper;
+import com.project.emoney.payload.response.SimpleResponseWrapper;
+import com.project.emoney.payload.dto.UserWrapper;
 import com.project.emoney.security.CurrentUser;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
@@ -23,6 +22,7 @@ public class UserController {
   @Autowired
   Validation validation;
 
+  //reload profile, for checking balance etc
   @GetMapping("/profile")
   public ResponseEntity<?> loadProfile(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
     RPCClient rpcClient = new RPCClient("profile");
@@ -31,6 +31,7 @@ public class UserController {
     return new ResponseEntity<>(new ResponseWrapper(200, "success", new UserWrapper(user)), HttpStatus.OK);
   }
 
+  //update password
   @PutMapping("/password")
   public ResponseEntity<?> updatePassword(@CurrentUser org.springframework.security.core.userdetails.User userDetails, @RequestBody User request) throws Exception {
     if (!validation.password(request.getPassword())){

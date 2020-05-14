@@ -3,12 +3,13 @@ package com.project.emoney.worker;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.*;
-import com.project.emoney.mybatis.TopUpOptionService;
-import com.project.emoney.mybatis.TransactionService;
-import com.project.emoney.mybatis.UserService;
-import com.project.emoney.payload.TopUpRequest;
-import com.project.emoney.payload.TransactionDTO;
-import com.project.emoney.payload.TransactionRequest;
+import com.project.emoney.service.TopUpOptionService;
+import com.project.emoney.service.TransactionService;
+import com.project.emoney.service.UserService;
+import com.project.emoney.payload.request.TopUpRequest;
+import com.project.emoney.payload.dto.TransactionDTO;
+import com.project.emoney.payload.request.TransactionRequest;
+import com.project.emoney.utils.GlobalVariable;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,11 +42,11 @@ public class TransactionWorker {
     TopUpOption topUpOption = topUpOptionService.getById(transactionRequest.getIdTopUpOption());
 
     if (transactionRequest.getMethod()==TransactionMethod.WALLET){
-      //cek saldo
+      //chek balance
       if (user.getBalance()<=0||user.getBalance()<topUpOption.getValue()+topUpOption.getFee()){
         return "not enough balance";
       }
-      //connect ke dummy server
+      //send request to dummy server
       TopUpRequest topUpRequest = new TopUpRequest(transactionRequest.getCardNumber(),topUpOption.getValue());
       RequestBody body = RequestBody.create(objectMapper.writeValueAsString(topUpRequest), JSON);
       Request request = new Request.Builder()
@@ -68,8 +69,9 @@ public class TransactionWorker {
   }
 
   private void saveTransaction(TransactionRequest transactionRequest, User user, TopUpOption topUpOption, Status status) {
-    Transaction transaction = new Transaction( user.getId(), transactionRequest.getCardNumber(), topUpOption.getValue(), topUpOption.getFee(),
-        status, transactionRequest.getMethod(), LocalDateTime.now().plusHours(7), LocalDateTime.now().plusHours(31));
+    Transaction transaction = new Transaction( user.getId(), transactionRequest.getCardNumber(), topUpOption.getValue(),
+        topUpOption.getFee(), status, transactionRequest.getMethod(),LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_HOURS),
+        LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_HOURS+GlobalVariable.TRANSACTION_LIFETIME_HOURS));
     transactionService.insert(transaction);
   }
 
@@ -106,20 +108,20 @@ public class TransactionWorker {
     List<TransactionDTO> transactionList = new ArrayList<TransactionDTO>();
 
     for (Transaction transaction: list) {
-      //kalo statusnya in progress
+      //if in progress
       if (transaction.getStatus()==Status.IN_PROGRESS) {
-        //cek apa udah expired
+        //cek whether expired
         LocalDateTime expiredTime = transaction.getExpiry();
         LocalDateTime localDateTime = LocalDateTime.now();
         int compareValue = expiredTime.compareTo(localDateTime);
         if (compareValue < 0) {
-          //kalo iya update jadi failed terus tambah ke list
+          //set failed if expired and add to list
           transaction.setStatus(Status.FAILED);
           transactionService.updateStatusById(transaction.getId(), Status.FAILED);
           transactionList.add(new TransactionDTO(transaction));
         }
       } else {
-        //kalo gak in progress otomatsi masuk list
+        //if not in progress, add to list
         transactionList.add(new TransactionDTO(transaction));
       }
     }

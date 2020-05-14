@@ -9,9 +9,7 @@ import java.io.*;
 
 public class FTPBuilder {
 
-    FTPClient ftp = null;
-
-    public FTPBuilder(){};
+    FTPClient ftp;
 
     public FTPBuilder(String host, String user, String pwd) throws Exception {
         ftp = new FTPClient();
@@ -33,16 +31,5 @@ public class FTPBuilder {
 
     public void deleteFile(String filename) throws IOException {
         ftp.deleteFile(filename);
-    }
-
-    public void disconnect() {
-        if (this.ftp.isConnected()) {
-            try {
-                this.ftp.logout();
-                this.ftp.disconnect();
-            } catch (IOException f) {
-                // do nothing as file is already downloaded from FTP server
-            }
-        }
     }
 }

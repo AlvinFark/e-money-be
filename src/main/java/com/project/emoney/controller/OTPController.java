@@ -1,10 +1,10 @@
 package com.project.emoney.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.emoney.payload.OTPRequest;
-import com.project.emoney.payload.ResponseWrapper;
-import com.project.emoney.payload.SimpleResponseWrapper;
-import com.project.emoney.payload.UserWithToken;
+import com.project.emoney.payload.request.OTPRequest;
+import com.project.emoney.payload.response.ResponseWrapper;
+import com.project.emoney.payload.response.SimpleResponseWrapper;
+import com.project.emoney.payload.dto.UserWithToken;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class OTPController {
 
   @RequestMapping(value = "/otp", method = RequestMethod.POST)
   public ResponseEntity<?> create(@RequestBody OTPRequest otpRequest) throws Exception {
-    //validasi otp
+    //validate otp format
     if (!validation.otp(otpRequest.getCode())){
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid code"), HttpStatus.BAD_REQUEST);
     }
@@ -44,17 +44,18 @@ public class OTPController {
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(otpRequest));
 
     //translate response mq
-    if (responseMQ.equals("account already active")) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(409, responseMQ), HttpStatus.CONFLICT);
-    } else if (responseMQ.equals("invalid code")) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
-    } else if (responseMQ.equals("code expired")) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
-    } else if (responseMQ.equals("user not found")) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(404, responseMQ), HttpStatus.NOT_FOUND);
-    } else {
-      UserWithToken userWithToken = objectMapper.readValue(responseMQ, UserWithToken.class);
-      return new ResponseEntity<>(new ResponseWrapper(202, "accepted", userWithToken), HttpStatus.ACCEPTED);
+    switch (responseMQ) {
+      case "account already active":
+        return new ResponseEntity<>(new SimpleResponseWrapper(409, responseMQ), HttpStatus.CONFLICT);
+      case "invalid code":
+        return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
+      case "code expired":
+        return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
+      case "user not found":
+        return new ResponseEntity<>(new SimpleResponseWrapper(404, responseMQ), HttpStatus.NOT_FOUND);
+      default:
+        UserWithToken userWithToken = objectMapper.readValue(responseMQ, UserWithToken.class);
+        return new ResponseEntity<>(new ResponseWrapper(202, "accepted", userWithToken), HttpStatus.ACCEPTED);
     }
   }
 }

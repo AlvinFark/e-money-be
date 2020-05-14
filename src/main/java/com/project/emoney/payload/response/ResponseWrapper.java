@@ -1,9 +1,10 @@
-package com.project.emoney.payload;
+package com.project.emoney.payload.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+//establish response format, this one is when response has data
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

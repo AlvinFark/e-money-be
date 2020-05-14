@@ -1,4 +1,4 @@
-package com.project.emoney.payload;
+package com.project.emoney.payload.dto;
 
 import com.project.emoney.entity.Status;
 import com.project.emoney.entity.Transaction;
@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
+//help jackson serialize and deserialize localDateTime type
+//for some reason it won't deserialize it in worker services
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
