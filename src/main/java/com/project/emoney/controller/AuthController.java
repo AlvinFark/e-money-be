@@ -78,21 +78,24 @@ public class AuthController {
     RPCClient rpcClient = new RPCClient("register");
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(user));
     //translate MQ response
-    if (responseMQ.equals("success")){
-      //Send email verification
+    switch (responseMQ) {
+      case "inactive account, otp sent":
+        //Send email verification
 //      try {
 //        String appUrl = request.getRequestURL().toString();
 //        eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, locale, appUrl));
 //      }catch(Exception re) {
 //        return new ResponseEntity<>(new SimpleResponseWrapper(420, "timeout connection problem"), HttpStatus.REQUEST_TIMEOUT);
 //      }
-      return new ResponseEntity<>(new SimpleResponseWrapper(201, responseMQ), HttpStatus.OK);
-    } else if (responseMQ.equals("bad credentials")) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
-    } else {
-      return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new SimpleResponseWrapper(201, "success"), HttpStatus.CREATED);
+      case "unverified number, can't send otp":
+        return new ResponseEntity<>(new SimpleResponseWrapper(500, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
+      case "bad credentials":
+        return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
+      default:
+        return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
     }
-  }
+    }
 
   @RequestMapping(value = "/confirmRegistration", method = RequestMethod.GET)
   public String confirmRegistration(WebRequest request, @RequestParam("token") String token) {
@@ -134,15 +137,16 @@ public class AuthController {
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
 
     //translate MQ response
-    if (responseMQ.equals("bad credentials")) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
-    } else if (responseMQ.equals("inactive account, otp sent")) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(403, responseMQ), HttpStatus.FORBIDDEN);
-    } else if (responseMQ.equals("unverified number, can't send otp")) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(500, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
-    } else {
-      UserWithToken userWithToken = objectMapper.readValue(responseMQ, UserWithToken.class);
-      return new ResponseEntity<>(new ResponseWrapper(202, "accepted", userWithToken), HttpStatus.ACCEPTED);
+    switch (responseMQ) {
+      case "bad credentials":
+        return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
+      case "inactive account, otp sent":
+        return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
+      case "unverified number, can't send otp":
+        return new ResponseEntity<>(new SimpleResponseWrapper(500, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
+      default:
+        UserWithToken userWithToken = objectMapper.readValue(responseMQ, UserWithToken.class);
+        return new ResponseEntity<>(new ResponseWrapper(202, "accepted", userWithToken), HttpStatus.ACCEPTED);
     }
   }
 }
