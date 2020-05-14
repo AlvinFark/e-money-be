@@ -97,7 +97,7 @@ public class AuthWorker {
       otp.setEmailOrPhone(phone);
       otp.setCode(generator.generateOtp());
       //add 7 hours to calibrate it with server
-      otp.setTime(LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_HOURS));
+      otp.setTime(LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_DB_HOURS));
       Twilio.init(twilioAccountSid, twilioAuthToken);
       Message.creator(
           new PhoneNumber("+"+phone),

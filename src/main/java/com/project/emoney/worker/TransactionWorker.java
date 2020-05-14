@@ -70,8 +70,8 @@ public class TransactionWorker {
 
   private void saveTransaction(TransactionRequest transactionRequest, User user, TopUpOption topUpOption, Status status) {
     Transaction transaction = new Transaction( user.getId(), transactionRequest.getCardNumber(), topUpOption.getValue(),
-        topUpOption.getFee(), status, transactionRequest.getMethod(),LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_HOURS),
-        LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_HOURS+GlobalVariable.TRANSACTION_LIFETIME_HOURS));
+        topUpOption.getFee(), status, transactionRequest.getMethod(),LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_DB_HOURS),
+        LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_DB_HOURS +GlobalVariable.TRANSACTION_LIFETIME_HOURS));
     transactionService.insert(transaction);
   }
 
@@ -85,7 +85,7 @@ public class TransactionWorker {
 
     for (Transaction transaction: list) {
         LocalDateTime expiredTime = transaction.getExpiry();
-        LocalDateTime localDateTime = LocalDateTime.now();
+        LocalDateTime localDateTime = LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_APP_HOURS);
         int compareValue = expiredTime.compareTo(localDateTime);
         if(compareValue > 0) {
           //Add to list in-progress
@@ -112,7 +112,7 @@ public class TransactionWorker {
       if (transaction.getStatus()==Status.IN_PROGRESS) {
         //cek whether expired
         LocalDateTime expiredTime = transaction.getExpiry();
-        LocalDateTime localDateTime = LocalDateTime.now();
+        LocalDateTime localDateTime = LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_APP_HOURS);
         int compareValue = expiredTime.compareTo(localDateTime);
         if (compareValue < 0) {
           //set failed if expired and add to list

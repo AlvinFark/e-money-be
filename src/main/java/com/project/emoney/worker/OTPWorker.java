@@ -62,7 +62,7 @@ public class OTPWorker {
         return "invalid code";
       }
       //check whether already expired, expiration time is set in global variable
-      if (otp.getTime().plusMinutes(GlobalVariable.OTP_LIFETIME_MINUTES).isBefore(LocalDateTime.now())) {
+      if (otp.getTime().plusMinutes(GlobalVariable.OTP_LIFETIME_MINUTES).isBefore(LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_APP_HOURS))) {
         return "code expired";
       }
       //return dan set active
