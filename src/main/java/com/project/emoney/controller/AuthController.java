@@ -47,6 +47,11 @@ public class AuthController {
     }
 
     //validate name
+    if(!validation.email(user.getEmail())) {
+      return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
+    }
+
+    //validate name
     if(!validation.name(user.getName())) {
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
     }
