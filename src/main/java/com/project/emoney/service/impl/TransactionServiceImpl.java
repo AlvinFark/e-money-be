@@ -1,4 +1,4 @@
-package com.project.emoney.mybatis;
+package com.project.emoney.service;
 
 import com.project.emoney.entity.Status;
 import com.project.emoney.entity.Transaction;

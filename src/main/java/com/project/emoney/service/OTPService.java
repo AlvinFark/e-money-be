@@ -1,7 +1,6 @@
-package com.project.emoney.mybatis;
+package com.project.emoney.service;
 
 import com.project.emoney.entity.OTP;
-import org.springframework.stereotype.Service;
 
 public interface OTPService {
   void create(OTP otp);

@@ -1,4 +1,4 @@
-package com.project.emoney.mybatis;
+package com.project.emoney.service;
 
 import com.project.emoney.entity.OTP;
 import com.project.emoney.mapper.OTPMapper;

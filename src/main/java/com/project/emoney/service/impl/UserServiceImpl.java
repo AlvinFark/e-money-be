@@ -1,4 +1,4 @@
-package com.project.emoney.mybatis;
+package com.project.emoney.service;
 
 import com.project.emoney.entity.EmailToken;
 import com.project.emoney.entity.User;
@@ -6,7 +6,6 @@ import com.project.emoney.mapper.EmailTokenMapper;
 import com.project.emoney.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService{

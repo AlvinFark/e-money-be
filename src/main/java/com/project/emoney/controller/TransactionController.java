@@ -2,9 +2,12 @@ package com.project.emoney.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.emoney.entity.Transaction;
 import com.project.emoney.entity.User;
-import com.project.emoney.payload.*;
+import com.project.emoney.payload.response.ResponseWrapper;
+import com.project.emoney.payload.response.SimpleResponseWrapper;
+import com.project.emoney.payload.dto.TransactionDTO;
+import com.project.emoney.payload.dto.UserWrapper;
+import com.project.emoney.payload.request.TransactionRequest;
 import com.project.emoney.security.CurrentUser;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
@@ -30,7 +33,7 @@ public class TransactionController {
       @CurrentUser org.springframework.security.core.userdetails.User userDetails,
       @RequestBody Map<String,Object> request) throws Exception {
 
-    //validate method transaksi apa sesuai enum
+    //validate transaction method, only listed at enum allowed
     TransactionRequest transactionRequest;
     try {
       transactionRequest = objectMapper.convertValue(request, TransactionRequest.class);
@@ -43,9 +46,14 @@ public class TransactionController {
       return new ResponseEntity<>(new ResponseWrapper(401, "success", transactionRequest), HttpStatus.OK);
     }
 
+    //set email by extracting from token
     transactionRequest.setEmail(userDetails.getUsername());
+
+    //send and receive from MQ
     RPCClient rpcClient = new RPCClient("transaction");
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(transactionRequest));
+
+    //translate MQ response
     try {
       User user = objectMapper.readValue(responseMQ, User.class);
       return new ResponseEntity<>(new ResponseWrapper(201, "success", new UserWrapper(user)), HttpStatus.CREATED);
@@ -60,21 +68,23 @@ public class TransactionController {
     }
   }
 
+  //get all in progress transaction from current user
   @GetMapping("/in-progress")
   public ResponseEntity<?> getInProgress(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
     RPCClient rpcClient = new RPCClient("in-progress");
     String responseMQ = rpcClient.call(userDetails.getUsername());
-    List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
 
+    List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
     return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
   }
 
+  //get all completed transaction from current user
   @GetMapping("/completed")
   public ResponseEntity<?> getCompleted(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
     RPCClient rpcClient = new RPCClient("completed");
     String responseMQ = rpcClient.call(userDetails.getUsername());
-    List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
 
+    List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
     return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
   }
 }

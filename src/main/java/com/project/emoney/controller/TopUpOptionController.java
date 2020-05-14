@@ -4,11 +4,8 @@ package com.project.emoney.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.TopUpOption;
-import com.project.emoney.entity.User;
-import com.project.emoney.mybatis.TopUpOptionService;
-import com.project.emoney.payload.ResponseWrapper;
-import com.project.emoney.payload.SimpleResponseWrapper;
-import com.project.emoney.security.CurrentUser;
+import com.project.emoney.service.TopUpOptionService;
+import com.project.emoney.payload.response.ResponseWrapper;
 import com.project.emoney.utils.RPCClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,21 +24,19 @@ public class TopUpOptionController {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    //CREATE TOP UP OPTION
+    //create top up option, unused by client
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ResponseEntity<?> create(@RequestBody TopUpOption topUpOption) {
-
         topUpOptionService.createTopUpOption(topUpOption);
-
         return new ResponseEntity<>(topUpOption, HttpStatus.CREATED);
     }
 
-    //SELECT ALL TOP UP OPTION
     @RequestMapping(value = "/api/topup-option", method = RequestMethod.GET)
     public ResponseEntity<?> selectAll() throws Exception {
-        //send and receive MQ
+        //send and receive MQ, no message, empty string just to notify MQ
         RPCClient rpcClient = new RPCClient("topup-option");
         String responseMQ = rpcClient.call("");
+        //deserialize and return list
         List<TopUpOption> topUpOptions = objectMapper.readValue(responseMQ, new TypeReference<List<TopUpOption>>() {});
         return new ResponseEntity<>(new ResponseWrapper(200, "success", topUpOptions), HttpStatus.OK);
     }

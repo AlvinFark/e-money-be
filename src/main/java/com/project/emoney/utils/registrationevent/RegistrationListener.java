@@ -1,7 +1,7 @@
 package com.project.emoney.registrationevent;
 
 import com.project.emoney.entity.User;
-import com.project.emoney.mybatis.UserService;
+import com.project.emoney.service.UserService;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;

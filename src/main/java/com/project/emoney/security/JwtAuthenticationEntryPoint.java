@@ -6,8 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.emoney.payload.SimpleResponseWrapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
