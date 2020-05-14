@@ -1,8 +1,9 @@
-package com.project.emoney.mybatis;
+package com.project.emoney.service.impl;
 
 import com.project.emoney.entity.Status;
 import com.project.emoney.entity.Transaction;
 import com.project.emoney.mapper.TransactionMapper;
+import com.project.emoney.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,11 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private TransactionMapper transactionMapper;
+
+    @Override
+    public Transaction getById(long id) {
+        return transactionMapper.getById(id);
+    }
 
     @Override
     public List<Transaction> getInProgressByUserId(long id) {
@@ -32,5 +38,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void updateStatusById(long id, Status status) {
         transactionMapper.setStatusById(id, status);
+    }
+
+    @Override
+    public void setExtensionById(long id, String extension) {
+        transactionMapper.setExtensionById(id, extension);
     }
 }

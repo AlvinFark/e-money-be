@@ -4,8 +4,14 @@ spring:
     url: jdbc:mysql://b256b206ac8263:7f7b13ed@us-cdbr-east-06.cleardb.net/heroku_48cf622b47df9e1?reconnect=true
     username: b256b206ac8263
     password: 7f7b13ed
-    testOnBorrow: true
-    validationQuery: SELECT 1
+    tomcat:
+      test-on-borrow: true
+      validation-query: SELECT 1
+
+  servlet:
+    multipart:
+      max-file-size: 1024KB
+      max-request-size: 1024KB
 
 #spring:
 #  datasource:
@@ -19,9 +25,3 @@ spring:
 
 jwt:
   secret: superverysecreykey
-
-phoneNumber: +12058439958
-twilioAccountSid: ACc9524830957a04cfdc9851c0392aacb9
-twilioAuthToken: 80d5a54ff172be4509222ebbd9239b33
-CLOUDAMQP_URL: amqp://wmaqowtk:SFX4rWejOk-3zCznHjw0PJZFFwHnqath@zebra.rmq.cloudamqp.com/wmaqowtk
-userMQ: nabila

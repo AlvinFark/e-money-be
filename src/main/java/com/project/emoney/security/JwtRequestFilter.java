@@ -1,18 +1,16 @@
 package com.project.emoney.security;
 import java.io.IOException;
-import java.sql.SQLSyntaxErrorException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.emoney.payload.SimpleResponseWrapper;
+import com.project.emoney.payload.response.SimpleResponseWrapper;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,7 +49,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       }
     } else {
       logger.warn("JWT Token does not begin with Bearer String");
-      if (!request.getRequestURI().equals("/api/login")&&!request.getRequestURI().equals("/api/register")&&!request.getRequestURI().equals("/api/otp")){
+      if (!request.getRequestURI().equals("/api/login")&&!request.getRequestURI().equals("/api/register")&&!request.getRequestURI().equals("/api/otp")
+      &&!request.getRequestURI().equals("/api/login/")&&!request.getRequestURI().equals("/api/register/")&&!request.getRequestURI().equals("/api/otp/")){
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponseWrapper(HttpStatus.UNAUTHORIZED.value(),"no token")));
       }

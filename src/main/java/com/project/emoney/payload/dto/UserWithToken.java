@@ -1,12 +1,11 @@
-package com.project.emoney.payload;
+package com.project.emoney.payload.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.emoney.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+//add token to user on data that sent to android, also hide encrypted password and active status
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

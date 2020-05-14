@@ -1,11 +1,11 @@
-package com.project.emoney.payload;
+package com.project.emoney.payload.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.emoney.entity.User;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+//same as user with token, but without token
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties({"password", "active"})
