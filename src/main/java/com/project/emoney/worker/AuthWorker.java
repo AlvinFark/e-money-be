@@ -86,35 +86,32 @@ public class AuthWorker {
       //save user
       userService.insert(user);
 //      sendEmail(user);
-      return sendOtp(user.getPhone());
     } catch (Exception e) {
-      if (e.getClass().getSimpleName().equals(SQLSyntaxErrorException.class.getSimpleName())){
-        return "too many connections";
-      }
-      e.printStackTrace();
-      return "internal server error";
+      return "too many connections";
     }
+    return sendOtp(user.getPhone());
   }
 
   public String login(String message) throws JsonProcessingException {
-      LoginRequest loginRequest = objectMapper.readValue(message, LoginRequest.class);
-      log.info("[login]  Receive login request for email or phone: " + loginRequest.getEmailOrPhone());
-      try {
-        //check user credentials
-        authenticate(loginRequest.getEmailOrPhone(), loginRequest.getPassword());
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
-        User user = userService.getUserByEmail(userDetails.getUsername());
-        //if already acive, then return token
-        if (user.isActive()) {
-          return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
-        }
-        //if inactive, send otp
-        return sendOtp(user.getPhone());
-      } catch (SQLSyntaxErrorException e) {
-        return "too many connections";
-      } catch (Exception e) {
-        return "bad credentials";
-      }
+    LoginRequest loginRequest = objectMapper.readValue(message, LoginRequest.class);
+    log.info("[login]  Receive login request for email or phone: " + loginRequest.getEmailOrPhone());
+    try {
+      //check user credentials
+      authenticate(loginRequest.getEmailOrPhone(), loginRequest.getPassword());
+    } catch (BadCredentialsException e) {
+      return "bad credentials";
+    } catch (Exception e) {
+      e.printStackTrace();
+      return "too many connections";
+    }
+    final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
+    User user = userService.getUserByEmail(userDetails.getUsername());
+    //if already acive, then return token
+    if (user.isActive()) {
+      return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
+    }
+    //if inactive, send otp
+    return sendOtp(user.getPhone());
   }
 
   private void sendEmail(User user) throws MessagingException {
@@ -154,13 +151,7 @@ public class AuthWorker {
     }
   }
 
-  private void authenticate(String username, String password) throws Exception {
-    try {
-      authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-    } catch (DisabledException e) {
-      throw new Exception("USER_DISABLED", e);
-    } catch (BadCredentialsException e) {
-      throw new Exception("INVALID_CREDENTIALS", e);
-    }
+  private void authenticate(String username, String password) {
+    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
   }
 }
