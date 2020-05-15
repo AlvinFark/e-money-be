@@ -30,7 +30,7 @@ public class RPCClient implements AutoCloseable {
 
     final URI rabbitMqUrl;
     try {
-      rabbitMqUrl = new URI(System.getenv("CLOUDAMQP_URL"));
+      rabbitMqUrl = new URI(System.getenv("T6CLOUDAMQP_URL"));
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
@@ -59,7 +59,7 @@ public class RPCClient implements AutoCloseable {
     ObjectMapper objectMapper = new ObjectMapper();
     MQRequestWrapper mqRequestWrapper = new MQRequestWrapper(requestQueueName,message);
     String messageWithQueue = objectMapper.writeValueAsString(mqRequestWrapper);
-    channel.basicPublish("", System.getenv("userMQ"), props, messageWithQueue.getBytes(StandardCharsets.UTF_8));
+    channel.basicPublish("", System.getenv("T6userMQ"), props, messageWithQueue.getBytes(StandardCharsets.UTF_8));
 
     final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
 

@@ -21,8 +21,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${mail.username}
-    password: ${mail.password}
+    username: ${T6mail.username}
+    password: ${T6mail.password}
     properties:
       mail.smtp.auth: true
       mail.smtp.connectiontimeout: 5000

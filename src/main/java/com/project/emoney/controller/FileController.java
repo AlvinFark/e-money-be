@@ -49,8 +49,8 @@ public class FileController {
         //get extension from file to be saved on db
         String extension = file.getOriginalFilename().split("\\.")[file.getOriginalFilename().split("\\.").length - 1];
         //init ftp connection
-        FTPBuilder ftp = new FTPBuilder(System.getenv("ftpserver"),
-            System.getenv("ftpusername"), System.getenv("ftppassword"));
+        FTPBuilder ftp = new FTPBuilder(System.getenv("T6ftpserver"),
+            System.getenv("T6ftpusername"), System.getenv("T6ftppassword"));
         //check whether user already upload a file for this transaction, delete it before if yes
         if (transaction.getImagePath() != null) {
           ftp.deleteFile("/bukti-transfer/" + idTransaction + "." + transaction.getImagePath());
