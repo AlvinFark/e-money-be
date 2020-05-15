@@ -63,9 +63,9 @@ public class AuthWorker {
   @Autowired
   JavaMailSender javaMailSender;
 
-  private final String myTwilioPhoneNumber = System.getenv("phoneNumber");
-  private final String twilioAccountSid = System.getenv("twilioAccountSid");
-  private final String twilioAuthToken = System.getenv("twilioAuthToken");
+  private final String myTwilioPhoneNumber = System.getenv("T6phoneNumber");
+  private final String twilioAccountSid = System.getenv("T6twilioAccountSid");
+  private final String twilioAuthToken = System.getenv("T6twilioAuthToken");
 
   ObjectMapper objectMapper = new ObjectMapper();
   private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);
@@ -76,14 +76,13 @@ public class AuthWorker {
     log.info("[register]  Receive register request for phone: " + user.getPhone());
     try {
       //save user
-//      userService.insert(user);
+      userService.insert(user);
       sendEmail(user);
     } catch (Exception e) {
       e.printStackTrace();
       return "too many connections";
     }
-//    return sendOtp(user.getPhone());
-    return "debug";
+    return sendOtp(user.getPhone());
   }
 
   public String login(String message) throws JsonProcessingException {
@@ -139,6 +138,7 @@ public class AuthWorker {
       return "inactive account, otp sent";
     } catch (ApiException e) {
       //twilio free can only send to verified number
+      e.printStackTrace();
       return "unverified number, can't send otp";
     }
   }

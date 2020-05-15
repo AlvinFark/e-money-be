@@ -35,11 +35,11 @@ public class WorkerRunner {
 
   @Async("workerExecutor")
   public void runner() {
-    final String QUEUE_NAME = System.getenv("userMQ");
+    final String QUEUE_NAME = System.getenv("T6userMQ");
 
     final URI rabbitMqUrl;
     try {
-      rabbitMqUrl = new URI(System.getenv("CLOUDAMQP_URL"));
+      rabbitMqUrl = new URI(System.getenv("T6CLOUDAMQP_URL"));
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
