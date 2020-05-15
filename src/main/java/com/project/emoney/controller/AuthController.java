@@ -32,13 +32,10 @@ public class AuthController {
   private UserService userService;
 
   @Autowired
-  private ApplicationEventPublisher eventPublisher;
-
-  @Autowired
   PasswordEncoder passwordEncoder;
 
   @RequestMapping(value = "/api/register", method = RequestMethod.POST)
-  public ResponseEntity<?> saveUser(@RequestBody User user, HttpServletRequest request, Locale locale) throws Exception {
+  public ResponseEntity<?> saveUser(@RequestBody User user) throws Exception {
     //validate password
     if (!validation.password(user.getPassword())){
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
@@ -56,11 +53,10 @@ public class AuthController {
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
     }
 
-    //validate phone & convert phone
+    //convert & validate phone phone
+    user.setPhone(validation.convertPhone(user.getPhone()));
     if (!validation.phone(user.getPhone())) {
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
-    } else {
-      user.setPhone(validation.convertPhone(user.getPhone()));
     }
 
     //check email & phone duplication
@@ -75,18 +71,9 @@ public class AuthController {
     //translate MQ response
     switch (responseMQ) {
       case "inactive account, otp sent":
-        //Send email verification
-//      try {
-//        String appUrl = request.getRequestURL().toString();
-//        eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, locale, appUrl));
-//      }catch(Exception re) {
-//        return new ResponseEntity<>(new SimpleResponseWrapper(420, "timeout connection problem"), HttpStatus.REQUEST_TIMEOUT);
-//      }
-        return new ResponseEntity<>(new SimpleResponseWrapper(201, "success"), HttpStatus.CREATED);
+        return new ResponseEntity<>(new SimpleResponseWrapper(201, "created, check email or sms for activation"), HttpStatus.CREATED);
       case "unverified number, can't send otp":
-        return new ResponseEntity<>(new SimpleResponseWrapper(500, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
-      case "bad credentials":
-        return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new SimpleResponseWrapper(201, "created, check email for activation"), HttpStatus.CREATED);
       default:
         return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
     }
