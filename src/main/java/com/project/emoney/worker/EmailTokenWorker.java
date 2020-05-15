@@ -28,7 +28,7 @@ public class EmailTokenWorker {
       return "expired code";
     }
     User user = userService.getUserById(emailToken.getUserId());
-    userService.setActiveByEmail(user.getEmail());
+    userService.activateUser(user);
     return "success";
   }
 }

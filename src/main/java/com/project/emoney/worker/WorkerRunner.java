@@ -30,6 +30,9 @@ public class WorkerRunner {
   @Autowired
   TransactionWorker transactionWorker;
 
+  @Autowired
+  EmailTokenWorker emailTokenWorker;
+
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
@@ -91,6 +94,8 @@ public class WorkerRunner {
           case "otp":
             response = otpWorker.send(mqRequest.getMessage());
             break;
+          case "verify":
+            response = emailTokenWorker.verify(mqRequest.getMessage());
           case "password":
             response = userWorker.password(mqRequest.getMessage());
             break;
