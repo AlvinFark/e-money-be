@@ -71,18 +71,18 @@ public class AuthWorker {
   private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   public String register(String message) throws JsonProcessingException {
-    User user = objectMapper.readValue(message, User.class);
-    log.info("[register]  Receive register request for email: " + user.getEmail());
-    log.info("[register]  Receive register request for phone: " + user.getPhone());
+    User userRequest = objectMapper.readValue(message, User.class);
+    log.info("[register]  Receive register request for email: " + userRequest.getEmail());
+    log.info("[register]  Receive register request for phone: " + userRequest.getPhone());
     try {
       //save user
-      userService.insert(user);
+      User user = userService.insert(userRequest);
       sendEmail(user);
     } catch (Exception e) {
       e.printStackTrace();
       return "too many connections";
     }
-    return sendOtp(user.getPhone());
+    return sendOtp(userRequest.getPhone());
   }
 
   public String login(String message) throws JsonProcessingException {
@@ -110,8 +110,7 @@ public class AuthWorker {
   private void sendEmail(User user) throws MessagingException {
     //generate and save to db
     String token = generator.generateToken();
-//    emailTokenService.createVerificationToken(user,token);
-
+    emailTokenService.createVerificationToken(user,token);
     MimeMessage message = javaMailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(message, true);
     helper.setSubject("Please confirm your new e-Money App account");
