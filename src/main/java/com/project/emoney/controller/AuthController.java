@@ -74,16 +74,10 @@ public class AuthController {
 //    String responseMQ = authWorker.register(objectMapper.writeValueAsString(user));
 
     //translate MQ response
-    switch (responseMQ) {
-      case "inactive account, otp sent":
-        return new ResponseEntity<>(new SimpleResponseWrapper(201, "created, check email or sms for activation"), HttpStatus.CREATED);
-      case "unverified number, can't send otp":
-        return new ResponseEntity<>(new SimpleResponseWrapper(201, "created, check email for activation"), HttpStatus.CREATED);
-      case "too many connections":
-        return new ResponseEntity<>(new SimpleResponseWrapper(429, responseMQ), HttpStatus.TOO_MANY_REQUESTS);
-      default:
-        return new ResponseEntity<>(new SimpleResponseWrapper(500, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
+    if (responseMQ.equals("too many connections")) {
+      return new ResponseEntity<>(new SimpleResponseWrapper(429, responseMQ), HttpStatus.TOO_MANY_REQUESTS);
     }
+    return new ResponseEntity<>(new SimpleResponseWrapper(201, responseMQ), HttpStatus.CREATED);
   }
 
   @RequestMapping(value = "/api/login", method = RequestMethod.POST)

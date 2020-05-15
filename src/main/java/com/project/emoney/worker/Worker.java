@@ -15,7 +15,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
 @Component
-public class WorkerRunner{
+public class Worker {
 
   @Autowired
   AuthWorker authWorker;
@@ -36,8 +36,7 @@ public class WorkerRunner{
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   @Async("workerExecutor")
-  public void runner() {
-    final String QUEUE_NAME = "T6";
+  public void run(String QUEUE_NAME) {
 
     ConnectionFactory factory = new ConnectionFactory();
     factory.setUsername("user06");
@@ -51,7 +50,7 @@ public class WorkerRunner{
 
       channel.basicQos(1);
 
-      log.info("[worker]  Awaiting messages");
+      log.info("["+QUEUE_NAME+"Worker]  Awaiting messages");
 
       Object monitor = new Object();
       DeliverCallback deliverCallback = (consumerTag, delivery) -> {
@@ -63,41 +62,42 @@ public class WorkerRunner{
         String response = "";
 
         String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-        MQRequestWrapper mqRequest = objectMapper.readValue(message,MQRequestWrapper.class);
 
-        switch (mqRequest.getQueue()){
-          case "login":
-            response = authWorker.login(mqRequest.getMessage());
-            break;
-          case "register":
-            response = authWorker.register(mqRequest.getMessage());
-            break;
-          case "in-progress":
-            response = transactionWorker.transactionInProgress(mqRequest.getMessage());
-            break;
-          case "completed":
-            response = transactionWorker.transactionCompleted(mqRequest.getMessage());
-            break;
-          case "profile":
-            response = userWorker.profile(mqRequest.getMessage());
-            break;
-          case "otp":
-            response = otpWorker.send(mqRequest.getMessage());
-            break;
-          case "verify":
-            response = emailTokenWorker.verify(mqRequest.getMessage());
-          case "password":
-            response = userWorker.password(mqRequest.getMessage());
-            break;
-          case "cancelTransaction":
-            response = transactionWorker.cancel(mqRequest.getMessage());
-            break;
-          case "transaction":
-            try {
-              response = transactionWorker.createTransaction(mqRequest.getMessage());
-            } catch (Exception e) {
-              response = "e-money server unreachable";
-            }
+        try {
+          switch (QUEUE_NAME) {
+            case "login":
+              response = authWorker.login(message);
+              break;
+            case "register":
+              response = authWorker.register(message);
+              break;
+            case "in-progress":
+              response = transactionWorker.transactionInProgress(message);
+              break;
+            case "completed":
+              response = transactionWorker.transactionCompleted(message);
+              break;
+            case "profile":
+              response = userWorker.profile(message);
+              break;
+            case "otp":
+              response = otpWorker.send(message);
+              break;
+            case "verify":
+              response = emailTokenWorker.verify(message);
+              break;
+            case "password":
+              response = userWorker.password(message);
+              break;
+            case "cancelTransaction":
+              response = transactionWorker.cancel(message);
+              break;
+            case "transaction":
+              response = transactionWorker.createTransaction(message);
+              break;
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
         }
 
         channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.getBytes(StandardCharsets.UTF_8));

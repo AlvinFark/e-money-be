@@ -6,4 +6,5 @@ import com.project.emoney.entity.User;
 public interface EmailTokenService {
     void createVerificationToken(User user, String token);
     EmailToken getVerificationToken(String VerificationToken);
+    String sendEmail(User user);
 }

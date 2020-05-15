@@ -76,7 +76,7 @@ public class UserServiceTest {
   public void setActiveTest() {
     final String email = "dwight@dundermifflin.co";
     userService.setActiveByEmail(email);
-    verify(userMapper, times(1)).setActive(email);
+    verify(userMapper, times(1)).setActiveByEmail(email);
   }
 
   @Test
