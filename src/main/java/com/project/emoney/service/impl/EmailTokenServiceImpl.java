@@ -14,21 +14,6 @@ public class EmailTokenServiceImpl implements EmailTokenService {
     EmailTokenMapper emailTokenMapper;
 
     @Override
-    public EmailToken findByToken(String token) {
-        return emailTokenMapper.findTokenByToken(token);
-    }
-
-    @Override
-    public EmailToken findByUser(User user) {
-        return emailTokenMapper.findTokenByUser(user);
-    }
-
-    @Override
-    public void save(EmailToken token) {
-        emailTokenMapper.createToken(token);
-    }
-
-    @Override
     public void createVerificationToken(User user, String token) {
         EmailToken newUserToken = new EmailToken(token, user);
         emailTokenMapper.createToken(newUserToken);

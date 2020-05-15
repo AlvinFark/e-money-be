@@ -1,27 +1,21 @@
 package com.project.emoney.controller;
 
-import com.project.emoney.entity.EmailToken;
-import com.project.emoney.entity.User;
-import com.project.emoney.service.EmailTokenService;
-import com.project.emoney.service.UserService;
+import com.project.emoney.worker.EmailTokenWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
-
-import java.util.Calendar;
-import java.util.Locale;
 
 @RestController
+@RequestMapping("/api")
 public class EmailTokenController {
 
   @Autowired
-  UserService userService;
+  EmailTokenWorker emailTokenWorker;
 
-  @Autowired
-  EmailTokenService emailTokenService;
-
-  @GetMapping(value = "/api/verify/code?{token}")
+  @GetMapping(value = "/verify/{token}")
   public String confirmRegistration(@PathVariable String token) {
-    return null;
+    //send and receive MQ
+//    RPCClient rpcClient = new RPCClient("verify");
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
+    return emailTokenWorker.verify(token);
   }
 }
