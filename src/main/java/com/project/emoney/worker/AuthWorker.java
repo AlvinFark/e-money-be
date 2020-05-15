@@ -60,16 +60,8 @@ public class AuthWorker {
   @Autowired
   private JwtTokenUtil jwtTokenUtil;
 
-  @Value("${spring.mail.host}") String hostEmail;
-  @Value("${spring.mail.port}") Integer portEmail;
-  private JavaMailSender getJavaMailSender() {
-    JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
-    mailSenderImpl.setHost(hostEmail);
-    mailSenderImpl.setPort(portEmail);
-    mailSenderImpl.setUsername(System.getenv("mail.username"));
-    mailSenderImpl.setPassword(System.getenv("mail.password"));
-    return mailSenderImpl;
-  }
+  @Autowired
+  JavaMailSender javaMailSender;
 
   private final String myTwilioPhoneNumber = System.getenv("phoneNumber");
   private final String twilioAccountSid = System.getenv("twilioAccountSid");
@@ -84,12 +76,14 @@ public class AuthWorker {
     log.info("[register]  Receive register request for phone: " + user.getPhone());
     try {
       //save user
-      userService.insert(user);
-//      sendEmail(user);
+//      userService.insert(user);
+      sendEmail(user);
     } catch (Exception e) {
+      e.printStackTrace();
       return "too many connections";
     }
-    return sendOtp(user.getPhone());
+//    return sendOtp(user.getPhone());
+    return "debug";
   }
 
   public String login(String message) throws JsonProcessingException {
@@ -119,11 +113,9 @@ public class AuthWorker {
     String token = generator.generateToken();
 //    emailTokenService.createVerificationToken(user,token);
 
-    JavaMailSender javaMailSender = getJavaMailSender();
     MimeMessage message = javaMailSender.createMimeMessage();
-    message.setSubject("Please confirm your new e-Money App account");
-
     MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    helper.setSubject("Please confirm your new e-Money App account");
     helper.setTo(user.getEmail());
     helper.setText("<a href=\"https://be-emoney.herokuapp.com/api/verify/code?"+token+"\">Please click here to activate your account</a>", true);
 
