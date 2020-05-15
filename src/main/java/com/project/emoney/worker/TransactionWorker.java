@@ -3,6 +3,8 @@ package com.project.emoney.worker;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.*;
+import com.project.emoney.payload.request.CancelRequest;
+import com.project.emoney.payload.response.SimpleResponseWrapper;
 import com.project.emoney.service.TopUpOptionService;
 import com.project.emoney.service.TransactionService;
 import com.project.emoney.service.UserService;
@@ -12,6 +14,8 @@ import com.project.emoney.payload.request.TransactionRequest;
 import com.project.emoney.utils.GlobalVariable;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -128,5 +132,27 @@ public class TransactionWorker {
     return objectMapper.writeValueAsString(transactionList);
   }
 
+  public String cancel(String message) throws JsonProcessingException {
+    CancelRequest cancelRequest = objectMapper.readValue(message, CancelRequest.class);
+    User user = userService.getUserByEmail(cancelRequest.getUserEmail());
 
+    try {
+      Transaction transaction = transactionService.getById(cancelRequest.getId());
+
+      //validation if user cancel for other's transaction
+      if (transaction.getUserId() != user.getId()) {
+        return "transaction belong to another user";
+      }
+
+      //can only cancel in progress transaction
+      if (transaction.getStatus() != Status.IN_PROGRESS) {
+        return "can't cancel completed transaction";
+      }
+
+      transactionService.updateStatusById(transaction.getId(), Status.CANCELLED);
+      return "success";
+    } catch (Exception e) {
+      return "transaction not found";
+    }
+  }
 }

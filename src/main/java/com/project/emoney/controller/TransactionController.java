@@ -2,7 +2,9 @@ package com.project.emoney.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.emoney.entity.Transaction;
 import com.project.emoney.entity.User;
+import com.project.emoney.payload.request.CancelRequest;
 import com.project.emoney.payload.response.ResponseWrapper;
 import com.project.emoney.payload.response.SimpleResponseWrapper;
 import com.project.emoney.payload.dto.TransactionDTO;
@@ -11,6 +13,7 @@ import com.project.emoney.payload.request.TransactionRequest;
 import com.project.emoney.security.CurrentUser;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
+import com.project.emoney.worker.TransactionWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +30,29 @@ public class TransactionController {
 
   @Autowired
   Validation validation;
+
+  @Autowired
+  TransactionWorker transactionWorker;
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<?> cancel(
+      @CurrentUser org.springframework.security.core.userdetails.User userDetails,
+      @PathVariable long id) throws Exception {
+    CancelRequest cancelRequest = new CancelRequest(id, userDetails.getUsername());
+//    RPCClient rpcClient = new RPCClient("cancelTransaction");
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(cancelRequest));
+    String responseMQ = transactionWorker.cancel(objectMapper.writeValueAsString(cancelRequest));
+    switch (responseMQ) {
+      case "success":
+        return new ResponseEntity<>(new SimpleResponseWrapper(200, responseMQ), HttpStatus.OK);
+      case "can't cancel completed transaction":
+        return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
+      case "transaction not found":
+        return new ResponseEntity<>(new SimpleResponseWrapper(404, responseMQ), HttpStatus.NOT_FOUND);
+      default:
+        return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
+    }
+  }
 
   @PostMapping
   public ResponseEntity<?> createTransaction(
@@ -50,8 +76,9 @@ public class TransactionController {
     transactionRequest.setEmail(userDetails.getUsername());
 
     //send and receive from MQ
-    RPCClient rpcClient = new RPCClient("transaction");
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(transactionRequest));
+//    RPCClient rpcClient = new RPCClient("transaction");
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(transactionRequest));
+    String responseMQ = transactionWorker.createTransaction(objectMapper.writeValueAsString(transactionRequest));
 
     //translate MQ response
     try {
@@ -71,8 +98,9 @@ public class TransactionController {
   //get all in progress transaction from current user
   @GetMapping("/in-progress")
   public ResponseEntity<?> getInProgress(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
-    RPCClient rpcClient = new RPCClient("in-progress");
-    String responseMQ = rpcClient.call(userDetails.getUsername());
+//    RPCClient rpcClient = new RPCClient("in-progress");
+//    String responseMQ = rpcClient.call(userDetails.getUsername());
+    String responseMQ = transactionWorker.transactionInProgress(userDetails.getUsername());
 
     List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
     return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
@@ -81,8 +109,9 @@ public class TransactionController {
   //get all completed transaction from current user
   @GetMapping("/completed")
   public ResponseEntity<?> getCompleted(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
-    RPCClient rpcClient = new RPCClient("completed");
-    String responseMQ = rpcClient.call(userDetails.getUsername());
+//    RPCClient rpcClient = new RPCClient("completed");
+//    String responseMQ = rpcClient.call(userDetails.getUsername());
+    String responseMQ = transactionWorker.transactionCompleted(userDetails.getUsername());
 
     List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
     return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);

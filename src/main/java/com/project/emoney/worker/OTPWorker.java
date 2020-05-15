@@ -18,7 +18,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLSyntaxErrorException;
 import java.time.LocalDateTime;
 
 @Service
@@ -54,7 +53,7 @@ public class OTPWorker {
       //check master key, master key requested by FE QA for automation
       if (otpRequest.getCode().equals("6666")) {
         //set active
-        userService.setActive(user.getEmail());
+        userService.setActiveByEmail(user.getEmail());
         return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
       }
       //check whether otp didn't exist on db (get the latest if duplicate) and whether exist but not for this user
@@ -67,7 +66,7 @@ public class OTPWorker {
         return "code expired";
       }
       //return dan set active
-      userService.setActive(user.getEmail());
+      userService.setActiveByEmail(user.getEmail());
       return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
     } catch (UsernameNotFoundException e) {
       return "user not found";
