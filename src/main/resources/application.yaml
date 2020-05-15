@@ -13,15 +13,19 @@ spring:
       max-file-size: 1024KB
       max-request-size: 1024KB
 
-#spring:
-#  datasource:
-#    url: jdbc:mysql://localhost:3306/emoney?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
-#    driver: com.mysql.cj.jdbc.Driver
-#    username: root
-#    password: jljlkl890090
-
+  main:
     hikari:
       maximum-pool-size: 10
+    banner-mode: off
 
-jwt:
-  secret: superverysecreykey
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${mail.username}
+    password: ${mail.password}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
+      mail.smtp.starttls.enable: true
