@@ -10,6 +10,6 @@ public interface UserService {
     User insert(User user);
     void updateBalance(User user);
     void updatePassword(User user);
-    void setActive(String email);
+    void setActiveByEmail(String email);
     void activateUser(User user);
 }

@@ -9,6 +9,7 @@ import com.project.emoney.payload.request.LoginRequest;
 import com.project.emoney.payload.dto.UserWithToken;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
+import com.project.emoney.worker.AuthWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,9 @@ public class AuthController {
 
   @Autowired
   PasswordEncoder passwordEncoder;
+
+  @Autowired
+  AuthWorker authWorker;
 
   @RequestMapping(value = "/api/register", method = RequestMethod.POST)
   public ResponseEntity<?> saveUser(@RequestBody User user) throws Exception {
@@ -60,13 +64,14 @@ public class AuthController {
     }
 
     //check email & phone duplication
-    if (userService.getUserByEmailOrPhone(user.getEmail()) != null || userService.getUserByEmailOrPhone(user.getPhone()) != null) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(409, "user with this phone number or email already exist"), HttpStatus.CONFLICT);
-    }
+//    if (userService.getUserByEmailOrPhone(user.getEmail()) != null || userService.getUserByEmailOrPhone(user.getPhone()) != null) {
+//      return new ResponseEntity<>(new SimpleResponseWrapper(409, "user with this phone number or email already exist"), HttpStatus.CONFLICT);
+//    }
 
     //send and receive MQ
-    RPCClient rpcClient = new RPCClient("register");
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(user));
+//    RPCClient rpcClient = new RPCClient("register");
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(user));
+    String responseMQ = authWorker.register(objectMapper.writeValueAsString(user));
 
     //translate MQ response
     switch (responseMQ) {
@@ -74,8 +79,10 @@ public class AuthController {
         return new ResponseEntity<>(new SimpleResponseWrapper(201, "created, check email or sms for activation"), HttpStatus.CREATED);
       case "unverified number, can't send otp":
         return new ResponseEntity<>(new SimpleResponseWrapper(201, "created, check email for activation"), HttpStatus.CREATED);
+      case "too many connections":
+        return new ResponseEntity<>(new SimpleResponseWrapper(429, responseMQ), HttpStatus.TOO_MANY_REQUESTS);
       default:
-        return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new SimpleResponseWrapper(500, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -95,8 +102,9 @@ public class AuthController {
     }
 
     //send and receive MQ
-    RPCClient rpcClient = new RPCClient("login");
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
+//    RPCClient rpcClient = new RPCClient("login");
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
+    String responseMQ = authWorker.login(objectMapper.writeValueAsString(loginRequest));
 
     //translate MQ response
     switch (responseMQ) {
@@ -105,7 +113,9 @@ public class AuthController {
       case "inactive account, otp sent":
         return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
       case "unverified number, can't send otp":
-        return new ResponseEntity<>(new SimpleResponseWrapper(500, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ+", use email verification or master key"), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
+      case "too many connections":
+        return new ResponseEntity<>(new SimpleResponseWrapper(429, responseMQ), HttpStatus.TOO_MANY_REQUESTS);
       default:
         UserWithToken userWithToken = objectMapper.readValue(responseMQ, UserWithToken.class);
         return new ResponseEntity<>(new ResponseWrapper(202, "accepted", userWithToken), HttpStatus.ACCEPTED);

@@ -11,10 +11,10 @@ public interface UserMapper {
     @Select("SELECT * FROM user WHERE id = #{id}")
     User getUserById(long id);
 
-    @Select("SELECT * FROM user WHERE email = #{email}")
+    @Select("SELECT * FROM user WHERE email = #{email} ORDER BY id DESC LIMIT 1")
     User getUserByEmail(String email);
 
-    @Select("SELECT * FROM user WHERE email = #{emailOrPhone} OR phone = #{emailOrPhone}")
+    @Select("SELECT * FROM user WHERE email = #{emailOrPhone} OR phone = #{emailOrPhone} ORDER BY id DESC LIMIT 1")
     User getUserByEmailOrPhone(String emailOrPhone);
 
     @Insert("INSERT INTO user (name, email, phone, password, balance, active) VALUES (#{name}, #{email}, #{phone}, #{password}, 0, false)")
