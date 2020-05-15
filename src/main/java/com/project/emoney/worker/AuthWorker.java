@@ -106,7 +106,7 @@ public class AuthWorker {
     }
     final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
     User user = userService.getUserByEmail(userDetails.getUsername());
-    //if already acive, then return token
+    //if already active, then return token
     if (user.isActive()) {
       return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
     }
