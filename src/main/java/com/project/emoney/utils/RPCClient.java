@@ -28,19 +28,10 @@ public class RPCClient implements AutoCloseable {
   public RPCClient(String requestQueueName) throws Exception {
     this.requestQueueName = requestQueueName;
 
-    final URI rabbitMqUrl;
-    try {
-      rabbitMqUrl = new URI(System.getenv("T6CLOUDAMQP_URL"));
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    }
-
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setUsername(rabbitMqUrl.getUserInfo().split(":")[0]);
-    factory.setPassword(rabbitMqUrl.getUserInfo().split(":")[1]);
-    factory.setHost(rabbitMqUrl.getHost());
-    factory.setPort(rabbitMqUrl.getPort());
-    factory.setVirtualHost(rabbitMqUrl.getPath().substring(1));
+//    factory.setUsername("user06");
+//    factory.setPassword("password06");
+    factory.setHost("localhost");
 
     connection = factory.newConnection();
     channel = connection.createChannel();
@@ -59,7 +50,7 @@ public class RPCClient implements AutoCloseable {
     ObjectMapper objectMapper = new ObjectMapper();
     MQRequestWrapper mqRequestWrapper = new MQRequestWrapper(requestQueueName,message);
     String messageWithQueue = objectMapper.writeValueAsString(mqRequestWrapper);
-    channel.basicPublish("", System.getenv("T6userMQ"), props, messageWithQueue.getBytes(StandardCharsets.UTF_8));
+    channel.basicPublish("", "T6", props, messageWithQueue.getBytes(StandardCharsets.UTF_8));
 
     final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
 

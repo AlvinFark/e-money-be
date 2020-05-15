@@ -44,9 +44,9 @@ public class OTPController {
     }
 
     //send and receive MQ
-//    RPCClient rpcClient = new RPCClient("otp");
-//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(otpRequest));
-    String responseMQ = otpWorker.send(objectMapper.writeValueAsString(otpRequest));
+    RPCClient rpcClient = new RPCClient("otp");
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(otpRequest));
+//    String responseMQ = otpWorker.send(objectMapper.writeValueAsString(otpRequest));
 
     //translate response mq
     switch (responseMQ) {

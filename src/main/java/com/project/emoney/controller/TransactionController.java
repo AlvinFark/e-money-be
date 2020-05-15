@@ -39,9 +39,9 @@ public class TransactionController {
       @CurrentUser org.springframework.security.core.userdetails.User userDetails,
       @PathVariable long id) throws Exception {
     CancelRequest cancelRequest = new CancelRequest(id, userDetails.getUsername());
-//    RPCClient rpcClient = new RPCClient("cancelTransaction");
-//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(cancelRequest));
-    String responseMQ = transactionWorker.cancel(objectMapper.writeValueAsString(cancelRequest));
+    RPCClient rpcClient = new RPCClient("cancelTransaction");
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(cancelRequest));
+//    String responseMQ = transactionWorker.cancel(objectMapper.writeValueAsString(cancelRequest));
     switch (responseMQ) {
       case "success":
         return new ResponseEntity<>(new SimpleResponseWrapper(200, responseMQ), HttpStatus.OK);
@@ -76,9 +76,9 @@ public class TransactionController {
     transactionRequest.setEmail(userDetails.getUsername());
 
     //send and receive from MQ
-//    RPCClient rpcClient = new RPCClient("transaction");
-//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(transactionRequest));
-    String responseMQ = transactionWorker.createTransaction(objectMapper.writeValueAsString(transactionRequest));
+    RPCClient rpcClient = new RPCClient("transaction");
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(transactionRequest));
+//    String responseMQ = transactionWorker.createTransaction(objectMapper.writeValueAsString(transactionRequest));
 
     //translate MQ response
     try {
@@ -98,9 +98,9 @@ public class TransactionController {
   //get all in progress transaction from current user
   @GetMapping("/in-progress")
   public ResponseEntity<?> getInProgress(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
-//    RPCClient rpcClient = new RPCClient("in-progress");
-//    String responseMQ = rpcClient.call(userDetails.getUsername());
-    String responseMQ = transactionWorker.transactionInProgress(userDetails.getUsername());
+    RPCClient rpcClient = new RPCClient("in-progress");
+    String responseMQ = rpcClient.call(userDetails.getUsername());
+//    String responseMQ = transactionWorker.transactionInProgress(userDetails.getUsername());
 
     List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
     return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
@@ -109,9 +109,9 @@ public class TransactionController {
   //get all completed transaction from current user
   @GetMapping("/completed")
   public ResponseEntity<?> getCompleted(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
-//    RPCClient rpcClient = new RPCClient("completed");
-//    String responseMQ = rpcClient.call(userDetails.getUsername());
-    String responseMQ = transactionWorker.transactionCompleted(userDetails.getUsername());
+    RPCClient rpcClient = new RPCClient("completed");
+    String responseMQ = rpcClient.call(userDetails.getUsername());
+//    String responseMQ = transactionWorker.transactionCompleted(userDetails.getUsername());
 
     List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
     return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);

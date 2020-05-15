@@ -15,8 +15,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
 @Component
-//public class WorkerRunner implements CommandLineRunner {
-public class WorkerRunner {
+public class WorkerRunner implements CommandLineRunner {
 
   @Autowired
   AuthWorker authWorker;
@@ -38,21 +37,12 @@ public class WorkerRunner {
 
   @Async("workerExecutor")
   public void runner() {
-    final String QUEUE_NAME = System.getenv("T6userMQ");
-
-    final URI rabbitMqUrl;
-    try {
-      rabbitMqUrl = new URI(System.getenv("T6CLOUDAMQP_URL"));
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    }
+    final String QUEUE_NAME = "T6";
 
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setUsername(rabbitMqUrl.getUserInfo().split(":")[0]);
-    factory.setPassword(rabbitMqUrl.getUserInfo().split(":")[1]);
-    factory.setHost(rabbitMqUrl.getHost());
-    factory.setPort(rabbitMqUrl.getPort());
-    factory.setVirtualHost(rabbitMqUrl.getPath().substring(1));
+//    factory.setUsername("user06");
+//    factory.setPassword("password06");
+    factory.setHost("localhost");
 
     try (Connection connection = factory.newConnection();
          Channel channel = connection.createChannel()) {
@@ -132,8 +122,11 @@ public class WorkerRunner {
     }
   }
 
-//  @Override
-//  public void run(String... args) {
-//    runner();
-//  }
+  @Override
+  public void run(String... args) {
+    runner();
+    runner();
+    runner();
+    runner();
+  }
 }

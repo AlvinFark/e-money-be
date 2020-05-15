@@ -29,10 +29,10 @@ public class UserController {
   //reload profile, for checking balance etc
   @GetMapping("/profile")
   public ResponseEntity<?> loadProfile(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
-//    RPCClient rpcClient = new RPCClient("profile");
-//    String responseMQ = rpcClient.call(userDetails.getUsername());
-//    User user = objectMapper.readValue(responseMQ, User.class);
-    User user = objectMapper.readValue(userWorker.profile(userDetails.getUsername()), User.class);
+    RPCClient rpcClient = new RPCClient("profile");
+    String responseMQ = rpcClient.call(userDetails.getUsername());
+    User user = objectMapper.readValue(responseMQ, User.class);
+//    User user = objectMapper.readValue(userWorker.profile(userDetails.getUsername()), User.class);
     return new ResponseEntity<>(new ResponseWrapper(200, "success", new UserWrapper(user)), HttpStatus.OK);
   }
 
@@ -42,10 +42,10 @@ public class UserController {
     if (!validation.password(request.getPassword())){
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad credentials"), HttpStatus.BAD_REQUEST);
     }
-//    RPCClient rpcClient = new RPCClient("password");
+    RPCClient rpcClient = new RPCClient("password");
     request.setEmail(userDetails.getUsername());
-//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(request));
-    String responseMQ = userWorker.password(objectMapper.writeValueAsString(request));
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(request));
+//    String responseMQ = userWorker.password(objectMapper.writeValueAsString(request));
     return new ResponseEntity<>(new SimpleResponseWrapper(200, responseMQ), HttpStatus.OK);
   }
 

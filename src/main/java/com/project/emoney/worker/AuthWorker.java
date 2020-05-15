@@ -63,9 +63,9 @@ public class AuthWorker {
   @Autowired
   JavaMailSender javaMailSender;
 
-  private final String myTwilioPhoneNumber = System.getenv("T6phoneNumber");
-  private final String twilioAccountSid = System.getenv("T6twilioAccountSid");
-  private final String twilioAuthToken = System.getenv("T6twilioAuthToken");
+  @Value("${phoneNumber}") private String myTwilioPhoneNumber;
+  @Value("${twilioAccountSid}") private String twilioAccountSid;
+  @Value("${twilioAuthToken}") private String twilioAuthToken;
 
   ObjectMapper objectMapper = new ObjectMapper();
   private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);

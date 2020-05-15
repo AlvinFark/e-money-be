@@ -69,9 +69,9 @@ public class AuthController {
 //    }
 
     //send and receive MQ
-//    RPCClient rpcClient = new RPCClient("register");
-//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(user));
-    String responseMQ = authWorker.register(objectMapper.writeValueAsString(user));
+    RPCClient rpcClient = new RPCClient("register");
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(user));
+//    String responseMQ = authWorker.register(objectMapper.writeValueAsString(user));
 
     //translate MQ response
     switch (responseMQ) {
@@ -102,9 +102,9 @@ public class AuthController {
     }
 
     //send and receive MQ
-//    RPCClient rpcClient = new RPCClient("login");
-//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
-    String responseMQ = authWorker.login(objectMapper.writeValueAsString(loginRequest));
+    RPCClient rpcClient = new RPCClient("login");
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
+//    String responseMQ = authWorker.login(objectMapper.writeValueAsString(loginRequest));
 
     //translate MQ response
     switch (responseMQ) {
