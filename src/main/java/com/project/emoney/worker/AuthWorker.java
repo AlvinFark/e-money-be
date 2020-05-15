@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.OTP;
 import com.project.emoney.entity.User;
+import com.project.emoney.service.EmailTokenService;
 import com.project.emoney.service.OTPService;
 import com.project.emoney.service.UserService;
 import com.project.emoney.payload.request.LoginRequest;
@@ -19,6 +20,10 @@ import com.twilio.type.PhoneNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -26,6 +31,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.sql.SQLSyntaxErrorException;
 import java.time.LocalDateTime;
 
@@ -45,15 +52,27 @@ public class AuthWorker {
   private OTPService otpService;
 
   @Autowired
+  private EmailTokenService emailTokenService;
+
+  @Autowired
   private Generator generator;
 
   @Autowired
   private JwtTokenUtil jwtTokenUtil;
 
+  @Value("${spring.mail.host}") String hostEmail;
+  @Value("${spring.mail.port}") Integer portEmail;
+  private JavaMailSender getJavaMailSender() {
+    JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
+    mailSenderImpl.setHost(hostEmail);
+    mailSenderImpl.setPort(portEmail);
+    mailSenderImpl.setUsername(System.getenv("mail.username"));
+    mailSenderImpl.setPassword(System.getenv("mail.password"));
+    return mailSenderImpl;
+  }
+
   private final String myTwilioPhoneNumber = System.getenv("phoneNumber");
-
   private final String twilioAccountSid = System.getenv("twilioAccountSid");
-
   private final String twilioAuthToken = System.getenv("twilioAuthToken");
 
   ObjectMapper objectMapper = new ObjectMapper();
@@ -66,9 +85,14 @@ public class AuthWorker {
     try {
       //save user
       userService.insert(user);
+//      sendEmail(user);
       return sendOtp(user.getPhone());
     } catch (Exception e) {
-      return "bad credentials";
+      if (e.getClass().getSimpleName().equals(SQLSyntaxErrorException.class.getSimpleName())){
+        return "too many connections";
+      }
+      e.printStackTrace();
+      return "internal server error";
     }
   }
 
@@ -91,6 +115,22 @@ public class AuthWorker {
       } catch (Exception e) {
         return "bad credentials";
       }
+  }
+
+  private void sendEmail(User user) throws MessagingException {
+    //generate and save to db
+    String token = generator.generateToken();
+//    emailTokenService.createVerificationToken(user,token);
+
+    JavaMailSender javaMailSender = getJavaMailSender();
+    MimeMessage message = javaMailSender.createMimeMessage();
+    message.setSubject("Please confirm your new e-Money App account");
+
+    MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    helper.setTo(user.getEmail());
+    helper.setText("<a href=\"https://be-emoney.herokuapp.com/api/verify/code?"+token+"\">Please click here to activate your account</a>", true);
+
+    javaMailSender.send(message);
   }
 
   private String sendOtp(String phone) {
