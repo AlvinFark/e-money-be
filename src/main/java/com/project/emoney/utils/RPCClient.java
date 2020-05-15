@@ -1,7 +1,5 @@
 package com.project.emoney.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.emoney.payload.dto.MQRequestWrapper;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -10,8 +8,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -23,10 +19,10 @@ public class RPCClient implements AutoCloseable {
 
   private Connection connection;
   private Channel channel;
-  private String requestQueueName;
+  private String QUEUE_NAME;
 
-  public RPCClient(String requestQueueName) throws Exception {
-    this.requestQueueName = requestQueueName;
+  public RPCClient(String QUEUE_NAME) throws Exception {
+    this.QUEUE_NAME = QUEUE_NAME;
 
     ConnectionFactory factory = new ConnectionFactory();
     factory.setUsername("user06");
@@ -47,10 +43,7 @@ public class RPCClient implements AutoCloseable {
         .replyTo(replyQueueName)
         .build();
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    MQRequestWrapper mqRequestWrapper = new MQRequestWrapper(requestQueueName,message);
-    String messageWithQueue = objectMapper.writeValueAsString(mqRequestWrapper);
-    channel.basicPublish("", "T6", props, messageWithQueue.getBytes(StandardCharsets.UTF_8));
+    channel.basicPublish("", QUEUE_NAME, props, message.getBytes(StandardCharsets.UTF_8));
 
     final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
 

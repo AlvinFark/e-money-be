@@ -1,6 +1,6 @@
 package com.project.emoney;
 
-import com.project.emoney.worker.WorkerRunner;
+import com.project.emoney.worker.Worker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -10,17 +10,24 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class EmoneyApplication implements CommandLineRunner {
 
   @Autowired
-  WorkerRunner workerRunner;
+  Worker worker;
 
   public static void main(String[] args) {
     SpringApplication.run(EmoneyApplication.class, args);
   }
 
   @Override
-  public void run(String... args) throws Exception {
-    workerRunner.runner();
-    workerRunner.runner();
-    workerRunner.runner();
-    workerRunner.runner();
+  public void run(String... args) {
+    worker.run("login");
+    worker.run("register");
+    worker.run("in-progress");
+    worker.run("completed");
+    worker.run("profile");
+    worker.run("profile");
+    worker.run("otp");
+    worker.run("verify");
+    worker.run("password");
+    worker.run("cancelTransaction");
+    worker.run("transaction");
   }
 }
