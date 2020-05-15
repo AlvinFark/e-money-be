@@ -91,7 +91,7 @@ public class TransactionController {
       if (responseMQ.equals("not enough balance")){
         return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.valueOf(400));
       }
-      return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.UNAUTHORIZED);
+      return new ResponseEntity<>(new SimpleResponseWrapper(401, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

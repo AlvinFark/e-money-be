@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.OTP;
 import com.project.emoney.entity.User;
+import com.project.emoney.service.AsyncAdapterService;
 import com.project.emoney.service.OTPService;
 import com.project.emoney.service.UserService;
 import com.project.emoney.payload.request.OTPRequest;
@@ -19,12 +20,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class OTPWorker {
-
-  @Autowired
-  private JwtUserDetailsService userDetailsService;
 
   @Autowired
   private UserService userService;
@@ -35,6 +34,9 @@ public class OTPWorker {
   @Autowired
   private JwtTokenUtil jwtTokenUtil;
 
+  @Autowired
+  private AsyncAdapterService asyncAdapterService;
+
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
@@ -44,12 +46,15 @@ public class OTPWorker {
 
     try {
       //get user details
-      final UserDetails userDetails = userDetailsService.loadUserByUsername(otpRequest.getEmailOrPhone());
-      User user = userService.getUserByEmail(userDetails.getUsername());
+      CompletableFuture<User> userCompletableFuture = asyncAdapterService.getUserByEmailOrPhone(otpRequest.getEmailOrPhone());
+      CompletableFuture<UserDetails> userDetailsCompletableFuture = asyncAdapterService.loadUserDetailsByUsername(otpRequest.getEmailOrPhone());
+      User user = userCompletableFuture.get();
       //if active reject request
       if (user.isActive()) {
         return "account already active";
       }
+      final UserDetails userDetails = userDetailsCompletableFuture.get();
+      CompletableFuture.allOf(userCompletableFuture,userDetailsCompletableFuture);
       //check master key, master key requested by FE QA for automation
       if (otpRequest.getCode().equals("6666")) {
         //set active
