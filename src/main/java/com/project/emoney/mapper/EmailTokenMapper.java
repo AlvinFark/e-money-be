@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmailTokenMapper {
 
-    @Insert("INSERT INTO EmailToken (userId, token, createdDate, expiryDate) VALUES (#{userId}, #{token}, #{createdDate}, #{expiryDate})")
+    @Insert("INSERT INTO EmailToken (userId, token, time) VALUES (#{userId}, #{token}, #{time})")
     void createToken(EmailToken emailToken);
 
     @Select("SELECT * FROM EmailToken WHERE token = #{token}")
