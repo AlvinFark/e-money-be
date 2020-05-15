@@ -20,8 +20,8 @@ public interface UserMapper {
     @Insert("INSERT INTO user (name, email, phone, password, balance, active) VALUES (#{name}, #{email}, #{phone}, #{password}, 0, false)")
     void insert(User user);
 
-    @Update("UPDATE user SET active = TRUE WHERE email = #{email}")
-    void setActive(String email);
+    @Update("UPDATE user SET active = TRUE WHERE email = #{email} ORDER BY email DESC LIMIT 1")
+    void setActiveByEmail(String email);
 
     @Update("UPDATE user SET balance = #{balance} WHERE email = #{email}")
     void updateBalance(User user);

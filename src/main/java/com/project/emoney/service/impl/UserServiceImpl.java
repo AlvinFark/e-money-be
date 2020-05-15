@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void setActiveByEmail(String email) {
-        userMapper.setActive(email);
+        userMapper.setActiveByEmail(email);
     }
 
     @Override

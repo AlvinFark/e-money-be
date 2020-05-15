@@ -65,39 +65,39 @@ public class WorkerRunner{
         String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
         MQRequestWrapper mqRequest = objectMapper.readValue(message,MQRequestWrapper.class);
 
-        switch (mqRequest.getQueue()){
-          case "login":
-            response = authWorker.login(mqRequest.getMessage());
-            break;
-          case "register":
-            response = authWorker.register(mqRequest.getMessage());
-            break;
-          case "in-progress":
-            response = transactionWorker.transactionInProgress(mqRequest.getMessage());
-            break;
-          case "completed":
-            response = transactionWorker.transactionCompleted(mqRequest.getMessage());
-            break;
-          case "profile":
-            response = userWorker.profile(mqRequest.getMessage());
-            break;
-          case "otp":
-            response = otpWorker.send(mqRequest.getMessage());
-            break;
-          case "verify":
-            response = emailTokenWorker.verify(mqRequest.getMessage());
-          case "password":
-            response = userWorker.password(mqRequest.getMessage());
-            break;
-          case "cancelTransaction":
-            response = transactionWorker.cancel(mqRequest.getMessage());
-            break;
-          case "transaction":
-            try {
+        try {
+          switch (mqRequest.getQueue()) {
+            case "login":
+              response = authWorker.login(mqRequest.getMessage());
+              break;
+            case "register":
+              response = authWorker.register(mqRequest.getMessage());
+              break;
+            case "in-progress":
+              response = transactionWorker.transactionInProgress(mqRequest.getMessage());
+              break;
+            case "completed":
+              response = transactionWorker.transactionCompleted(mqRequest.getMessage());
+              break;
+            case "profile":
+              response = userWorker.profile(mqRequest.getMessage());
+              break;
+            case "otp":
+              response = otpWorker.send(mqRequest.getMessage());
+              break;
+            case "verify":
+              response = emailTokenWorker.verify(mqRequest.getMessage());
+            case "password":
+              response = userWorker.password(mqRequest.getMessage());
+              break;
+            case "cancelTransaction":
+              response = transactionWorker.cancel(mqRequest.getMessage());
+              break;
+            case "transaction":
               response = transactionWorker.createTransaction(mqRequest.getMessage());
-            } catch (Exception e) {
-              response = "e-money server unreachable";
-            }
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
         }
 
         channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.getBytes(StandardCharsets.UTF_8));
