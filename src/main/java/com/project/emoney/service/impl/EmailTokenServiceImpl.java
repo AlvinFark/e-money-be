@@ -46,7 +46,7 @@ public class EmailTokenServiceImpl implements EmailTokenService {
       MimeMessageHelper helper = new MimeMessageHelper(message, true);
       helper.setSubject("Please confirm your new e-Money App account");
       helper.setTo(user.getEmail());
-      helper.setText("<a href=\"https://be-emoney.herokuapp.com/api/verify/"+token+"\">Please click here to activate your account</a>", true);
+      helper.setText("<a href=\"http://ec2-3-95-185-42.compute-1.amazonaws.com:9706/api/verify/"+token+"\">Please click here to activate your account</a>", true);
 
       javaMailSender.send(message);
       return "success";
