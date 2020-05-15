@@ -20,10 +20,10 @@ public interface UserMapper {
     @Insert("INSERT INTO user (name, email, phone, password, balance, active) VALUES (#{name}, #{email}, #{phone}, #{password}, 0, false)")
     void insert(User user);
 
-    @Update("UPDATE USER SET active = TRUE WHERE email = #{email}")
+    @Update("UPDATE user SET active = TRUE WHERE email = #{email}")
     void setActive(String email);
 
-    @Update("UPDATE USER SET balance = #{balance} WHERE email = #{email}")
+    @Update("UPDATE user SET balance = #{balance} WHERE email = #{email}")
     void updateBalance(User user);
 
     @Select("UPDATE user SET active = true WHERE id = #{id}")

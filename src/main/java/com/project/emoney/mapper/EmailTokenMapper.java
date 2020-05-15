@@ -11,12 +11,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmailTokenMapper {
 
-    @Insert("INSERT INTO EmailToken (userId, token, time) VALUES (#{userId}, #{token}, #{time})")
+    @Insert("INSERT INTO emailtoken (userId, token, time) VALUES (#{userId}, #{token}, #{time})")
     void createToken(EmailToken emailToken);
 
     @Select("SELECT * FROM emailtoken WHERE token = #{token}")
     EmailToken findTokenByToken(String token);
 
-    @Select("SELECT * FROM EmailToken WHERE userId = #{id}")
+    @Select("SELECT * FROM emailtoken WHERE userId = #{id}")
     EmailToken findTokenByUser(User user);
 }

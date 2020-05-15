@@ -13,6 +13,6 @@ public interface OTPMapper {
   @Insert("INSERT INTO otp (emailOrPhone, code, time) VALUES (#{emailOrPhone}, #{code}, #{time})")
   void create(OTP otp);
 
-  @Select("SELECT * FROM OTP WHERE CODE = #{code} ORDER BY TIME DESC LIMIT 1")
+  @Select("SELECT * FROM otp WHERE CODE = #{code} ORDER BY TIME DESC LIMIT 1")
   OTP getByCodeOrderByTimeDesc(String code);
 }
