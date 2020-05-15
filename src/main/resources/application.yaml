@@ -1,7 +1,7 @@
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/team6
+    url: jdbc:mysql://ec2-3-95-185-42.compute-1.amazonaws.com:3306/team6
     username: root
     password: G2labDana123*
     tomcat:
