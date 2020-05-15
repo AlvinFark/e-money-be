@@ -29,8 +29,8 @@ public class RPCClient implements AutoCloseable {
     this.requestQueueName = requestQueueName;
 
     ConnectionFactory factory = new ConnectionFactory();
-//    factory.setUsername("user06");
-//    factory.setPassword("password06");
+    factory.setUsername("user06");
+    factory.setPassword("password06");
     factory.setHost("localhost");
 
     connection = factory.newConnection();

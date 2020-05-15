@@ -40,8 +40,8 @@ public class WorkerRunner implements CommandLineRunner {
     final String QUEUE_NAME = "T6";
 
     ConnectionFactory factory = new ConnectionFactory();
-//    factory.setUsername("user06");
-//    factory.setPassword("password06");
+    factory.setUsername("user06");
+    factory.setPassword("password06");
     factory.setHost("localhost");
 
     try (Connection connection = factory.newConnection();
