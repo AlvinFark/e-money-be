@@ -75,6 +75,8 @@ public class TransactionWorker {
           CompletableFuture.allOf(voidCompletableFutureTransaction,voidCompletableFutureUser);
           return objectMapper.writeValueAsString(user);
         }
+      } catch (Exception e) {
+        return "can't reach 3rd party server, try again";
       }
     }
     transactionService.saveTransaction(transactionRequest, user, topUpOption, Status.IN_PROGRESS);
