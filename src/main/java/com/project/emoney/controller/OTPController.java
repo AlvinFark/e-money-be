@@ -7,6 +7,7 @@ import com.project.emoney.payload.response.SimpleResponseWrapper;
 import com.project.emoney.payload.dto.UserWithToken;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
+import com.project.emoney.worker.OTPWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,9 @@ public class OTPController {
 
   @Autowired
   Validation validation;
+
+  @Autowired
+  OTPWorker otpWorker;
 
   @RequestMapping(value = "/otp", method = RequestMethod.POST)
   public ResponseEntity<?> create(@RequestBody OTPRequest otpRequest) throws Exception {
@@ -42,6 +46,7 @@ public class OTPController {
     //send and receive MQ
     RPCClient rpcClient = new RPCClient("otp");
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(otpRequest));
+//    String responseMQ = otpWorker.send(objectMapper.writeValueAsString(otpRequest));
 
     //translate response mq
     switch (responseMQ) {

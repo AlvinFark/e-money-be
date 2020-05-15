@@ -14,22 +14,22 @@ import java.util.List;
 @Repository
 public interface TransactionMapper {
 
-    @Select("SELECT * FROM Transaction WHERE userId = #{userId} AND status = 'IN_PROGRESS'")
+    @Select("SELECT * FROM transaction WHERE userId = #{userId} AND status = 'IN_PROGRESS'")
     List<Transaction> getInProgressByUserId(long userId);
 
-    @Select("SELECT * FROM Transaction WHERE userId = #{userId}")
+    @Select("SELECT * FROM transaction WHERE userId = #{userId}")
     List<Transaction> getAllByUserId(long userId);
 
-    @Select("SELECT * FROM Transaction WHERE id = #{id}")
+    @Select("SELECT * FROM transaction WHERE id = #{id}")
     Transaction getById(long id);
 
-    @Insert("INSERT INTO Transaction (userId, cardNumber, value, fee, status, time, method, expiry) VALUES" +
+    @Insert("INSERT INTO transaction (userId, cardNumber, value, fee, status, time, method, expiry) VALUES" +
         "(#{userId}, #{cardNumber}, #{value}, #{fee}, #{status}, #{time}, #{method}, #{expiry})")
     void insert(Transaction transaction);
 
-    @Update("UPDATE Transaction SET status = #{status} WHERE id = #{id}")
+    @Update("UPDATE transaction SET status = #{status} WHERE id = #{id}")
     void setStatusById(long id, Status status);
 
-    @Update("UPDATE Transaction SET imagePath = #{extension} WHERE id = #{id}")
+    @Update("UPDATE transaction SET imagePath = #{extension} WHERE id = #{id}")
     void setExtensionById(long id, String extension);
 }

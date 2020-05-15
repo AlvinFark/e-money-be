@@ -2,7 +2,6 @@ package com.project.emoney.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.payload.dto.MQRequestWrapper;
-import com.project.emoney.worker.*;
 import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
 @Component
-public class WorkerRunner implements CommandLineRunner {
+public class Worker {
 
   @Autowired
   AuthWorker authWorker;
@@ -28,31 +27,21 @@ public class WorkerRunner implements CommandLineRunner {
   OTPWorker otpWorker;
 
   @Autowired
-  TopUpWorker topUpWorker;
+  TransactionWorker transactionWorker;
 
   @Autowired
-  TransactionWorker transactionWorker;
+  EmailTokenWorker emailTokenWorker;
 
   ObjectMapper objectMapper = new ObjectMapper();
   private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   @Async("workerExecutor")
-  public void runner() {
-    final String QUEUE_NAME = System.getenv("userMQ");
-
-    final URI rabbitMqUrl;
-    try {
-      rabbitMqUrl = new URI(System.getenv("CLOUDAMQP_URL"));
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    }
+  public void run(String QUEUE_NAME) {
 
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setUsername(rabbitMqUrl.getUserInfo().split(":")[0]);
-    factory.setPassword(rabbitMqUrl.getUserInfo().split(":")[1]);
-    factory.setHost(rabbitMqUrl.getHost());
-    factory.setPort(rabbitMqUrl.getPort());
-    factory.setVirtualHost(rabbitMqUrl.getPath().substring(1));
+    factory.setUsername("user06");
+    factory.setPassword("password06");
+    factory.setHost("localhost");
 
     try (Connection connection = factory.newConnection();
          Channel channel = connection.createChannel()) {
@@ -61,7 +50,7 @@ public class WorkerRunner implements CommandLineRunner {
 
       channel.basicQos(1);
 
-      log.info("[worker]  Awaiting messages");
+      log.info("["+QUEUE_NAME+"Worker]  Awaiting messages");
 
       Object monitor = new Object();
       DeliverCallback deliverCallback = (consumerTag, delivery) -> {
@@ -73,39 +62,42 @@ public class WorkerRunner implements CommandLineRunner {
         String response = "";
 
         String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-        MQRequestWrapper mqRequest = objectMapper.readValue(message,MQRequestWrapper.class);
 
-        switch (mqRequest.getQueue()){
-          case "login":
-            response = authWorker.login(mqRequest.getMessage());
-            break;
-          case "register":
-            response = authWorker.register(mqRequest.getMessage());
-            break;
-          case "topup-option":
-            response = topUpWorker.topUpOption();
-            break;
-          case "in-progress":
-            response = transactionWorker.transactionInProgress(mqRequest.getMessage());
-            break;
-          case "completed":
-            response = transactionWorker.transactionCompleted(mqRequest.getMessage());
-            break;
-          case "profile":
-            response = userWorker.profile(mqRequest.getMessage());
-            break;
-          case "otp":
-            response = otpWorker.send(mqRequest.getMessage());
-            break;
-          case "password":
-            response = userWorker.password(mqRequest.getMessage());
-            break;
-          case "transaction":
-            try {
-              response = transactionWorker.createTransaction(mqRequest.getMessage());
-            } catch (Exception e) {
-              response = "e-money server unreachable";
-            }
+        try {
+          switch (QUEUE_NAME) {
+            case "login":
+              response = authWorker.login(message);
+              break;
+            case "register":
+              response = authWorker.register(message);
+              break;
+            case "in-progress":
+              response = transactionWorker.transactionInProgress(message);
+              break;
+            case "completed":
+              response = transactionWorker.transactionCompleted(message);
+              break;
+            case "profile":
+              response = userWorker.profile(message);
+              break;
+            case "otp":
+              response = otpWorker.send(message);
+              break;
+            case "verify":
+              response = emailTokenWorker.verify(message);
+              break;
+            case "password":
+              response = userWorker.password(message);
+              break;
+            case "cancelTransaction":
+              response = transactionWorker.cancel(message);
+              break;
+            case "transaction":
+              response = transactionWorker.createTransaction(message);
+              break;
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
         }
 
         channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.getBytes(StandardCharsets.UTF_8));
@@ -128,10 +120,5 @@ public class WorkerRunner implements CommandLineRunner {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  @Override
-  public void run(String... args) {
-    runner();
   }
 }

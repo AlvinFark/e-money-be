@@ -12,12 +12,12 @@ import java.util.List;
 @Repository
 public interface TopUpOptionMapper {
 
-    @Select("SELECT * FROM TopUpOption")
+    @Select("SELECT * FROM topupoption")
     List<TopUpOption> getAllTopUpOption();
 
-    @Insert("INSERT INTO TopUpOption (value, fee) VALUES (#{value}, #{fee})")
+    @Insert("INSERT INTO topupoption (value, fee) VALUES (#{value}, #{fee})")
     void createTopUpOption(TopUpOption topUpOption);
 
-    @Select("SELECT * FROM TopUpOption WHERE id = #{id}")
+    @Select("SELECT * FROM topupoption WHERE id = #{id}")
     TopUpOption getById(long id);
 }

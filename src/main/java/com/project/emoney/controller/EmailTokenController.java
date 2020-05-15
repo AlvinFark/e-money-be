@@ -1,45 +1,26 @@
 package com.project.emoney.controller;
 
-import com.project.emoney.entity.EmailToken;
-import com.project.emoney.entity.User;
-import com.project.emoney.service.EmailTokenService;
-import com.project.emoney.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.emoney.utils.RPCClient;
+import com.project.emoney.worker.EmailTokenWorker;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.WebRequest;
-
-import java.util.Calendar;
-import java.util.Locale;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api")
 public class EmailTokenController {
 
   @Autowired
-  UserService userService;
+  EmailTokenWorker emailTokenWorker;
 
   @Autowired
-  EmailTokenService emailTokenService;
+  ObjectMapper objectMapper;
 
-  @RequestMapping(value = "/confirmRegistration", method = RequestMethod.GET)
-  public String confirmRegistration(WebRequest request, @RequestParam("token") String token) {
-
-    Locale locale = request.getLocale();
-    EmailToken verificationToken = emailTokenService.getVerificationToken(token);
-    if(verificationToken == null) {
-      return "redirect:access-denied";
-    }
-
-    User user = verificationToken.getUser();
-    Calendar calendar = Calendar.getInstance();
-    if((verificationToken.getExpiryDate().getTime()-calendar.getTime().getTime())<=0) {
-      return "redirect:access-denied";
-    }
-
-    user.setActive(true);
-    userService.activateUser(user);
-    return null;
+  @GetMapping(value = "/verify/{token}")
+  public String confirmRegistration(@PathVariable String token) throws Exception {
+    //send and receive MQ
+    RPCClient rpcClient = new RPCClient("verify");
+    return rpcClient.call(token);
+//    return emailTokenWorker.verify(token);
   }
 }

@@ -31,37 +31,41 @@ public class FileController {
                                        @RequestParam("file") MultipartFile file) {
     //get user and transaction details
     User user = userService.getUserByEmail(userDetails.getUsername());
-    Transaction transaction = transactionService.getById(idTransaction);
-
-    //validation if user upladed for other's transaction
-    if (transaction.getUserId()!=user.getId()){
-      return new ResponseEntity<>(new SimpleResponseWrapper(401, "transaction belong to another user"), HttpStatus.UNAUTHORIZED);
-    }
-
-    //can only upload for bank transfer method
-    if (transaction.getStatus()!=Status.IN_PROGRESS||transaction.getMethod()!=TransactionMethod.BANK){
-      return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad transaction method or status"), HttpStatus.BAD_REQUEST);
-    }
 
     try {
-      //get extension from file to be saved on db
-      String extension = file.getOriginalFilename().split("\\.")[file.getOriginalFilename().split("\\.").length-1];
-      //init ftp connection
-      FTPBuilder ftp = new FTPBuilder(System.getenv("ftpserver"),
-          System.getenv("ftpusername"),System.getenv("ftppassword"));
-      //check whether user already upload a file for this transaction, delete it before if yes
-      if (transaction.getImagePath()!=null){
-        ftp.deleteFile("/bukti-transfer/"+idTransaction+"."+transaction.getImagePath());
+      Transaction transaction = transactionService.getById(idTransaction);
+
+      //validation if user upladed for other's transaction
+      if (transaction.getUserId() != user.getId()) {
+        return new ResponseEntity<>(new SimpleResponseWrapper(401, "transaction belong to another user"), HttpStatus.UNAUTHORIZED);
       }
-      //upload file and save extension to db
-      ftp.uploadFile(file, idTransaction+"."+extension, "/bukti-transfer/");
-      transactionService.setExtensionById(idTransaction, extension);
-    } catch (Exception e) {
-      //response if ftp server inactive
-      e.printStackTrace();
-      return new ResponseEntity<>(new SimpleResponseWrapper(503, "can't connect to FTP server"), HttpStatus.SERVICE_UNAVAILABLE);
+
+      //can only upload for bank transfer method
+      if (transaction.getStatus() != Status.IN_PROGRESS || transaction.getMethod() != TransactionMethod.BANK) {
+        return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad transaction method or status"), HttpStatus.BAD_REQUEST);
+      }
+
+      try {
+        //get extension from file to be saved on db
+        String extension = file.getOriginalFilename().split("\\.")[file.getOriginalFilename().split("\\.").length - 1];
+        //init ftp connection
+        FTPBuilder ftp = new FTPBuilder("ftp.drivehq.com","alvark", "WiUgm@Cq436AG5i");
+        //check whether user already upload a file for this transaction, delete it before if yes
+        if (transaction.getImagePath() != null) {
+          ftp.deleteFile("/bukti-transfer/" + idTransaction + "." + transaction.getImagePath());
+        }
+        //upload file and save extension to db
+        ftp.uploadFile(file, idTransaction + "." + extension, "/bukti-transfer/");
+        transactionService.setExtensionById(idTransaction, extension);
+      } catch (Exception e) {
+        //response if ftp server inactive
+        e.printStackTrace();
+        return new ResponseEntity<>(new SimpleResponseWrapper(503, "can't connect to FTP server"), HttpStatus.SERVICE_UNAVAILABLE);
+      }
+      //return success
+      return new ResponseEntity<>(new SimpleResponseWrapper(201, "success"), HttpStatus.CREATED);
+    } catch (NullPointerException e) {
+      return new ResponseEntity<>(new SimpleResponseWrapper(404, "transaction not found"), HttpStatus.NOT_FOUND);
     }
-    //return success
-    return new ResponseEntity<>(new SimpleResponseWrapper(201, "success"), HttpStatus.CREATED);
   }
 }

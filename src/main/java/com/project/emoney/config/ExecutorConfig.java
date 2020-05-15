@@ -15,10 +15,21 @@ public class ExecutorConfig {
   @Bean(name = "workerExecutor")
   public Executor workerExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(15);
+    executor.setMaxPoolSize(15);
+    executor.setQueueCapacity(1000);
+    executor.setThreadNamePrefix("Worker-");
+    executor.initialize();
+    return executor;
+  }
+
+  @Bean(name = "asyncExecutor")
+  public Executor asyncExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
     executor.setCorePoolSize(10);
     executor.setMaxPoolSize(10);
     executor.setQueueCapacity(1000);
-    executor.setThreadNamePrefix("Worker-");
+    executor.setThreadNamePrefix("Async-");
     executor.initialize();
     return executor;
   }

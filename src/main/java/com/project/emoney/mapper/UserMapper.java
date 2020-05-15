@@ -11,19 +11,19 @@ public interface UserMapper {
     @Select("SELECT * FROM user WHERE id = #{id}")
     User getUserById(long id);
 
-    @Select("SELECT * FROM user WHERE email = #{email}")
+    @Select("SELECT * FROM user WHERE email = #{email} ORDER BY id DESC LIMIT 1")
     User getUserByEmail(String email);
 
-    @Select("SELECT * FROM user WHERE email = #{emailOrPhone} OR phone = #{emailOrPhone}")
+    @Select("SELECT * FROM user WHERE email = #{emailOrPhone} OR phone = #{emailOrPhone} ORDER BY id DESC LIMIT 1")
     User getUserByEmailOrPhone(String emailOrPhone);
 
     @Insert("INSERT INTO user (name, email, phone, password, balance, active) VALUES (#{name}, #{email}, #{phone}, #{password}, 0, false)")
     void insert(User user);
 
-    @Update("UPDATE USER SET active = TRUE WHERE email = #{email}")
-    void setActive(String email);
+    @Update("UPDATE user SET active = TRUE WHERE email = #{email} ORDER BY email DESC LIMIT 1")
+    void setActiveByEmail(String email);
 
-    @Update("UPDATE USER SET balance = #{balance} WHERE email = #{email}")
+    @Update("UPDATE user SET balance = #{balance} WHERE email = #{email}")
     void updateBalance(User user);
 
     @Select("UPDATE user SET active = true WHERE id = #{id}")
