@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -39,7 +40,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       jwtToken = requestTokenHeader.substring(7);
       try {
         username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-      } catch (SignatureException | MalformedJwtException e) {
+      } catch (SignatureException | MalformedJwtException | UsernameNotFoundException e) {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponseWrapper(HttpStatus.UNAUTHORIZED.value(),"invalid token")));
       } catch (IllegalArgumentException e) {
@@ -69,9 +70,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
               .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
           SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         }
-      } catch (Exception e) {
-        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-        response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponseWrapper(HttpStatus.TOO_MANY_REQUESTS.value(),"too many connections")));
+      } catch (UsernameNotFoundException e) {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponseWrapper(HttpStatus.UNAUTHORIZED.value(),"invalid token")));
       }
     }
     chain.doFilter(request, response);
