@@ -97,14 +97,10 @@ public class TransactionController {
   public ResponseEntity<?> getInProgress(@CurrentUser org.springframework.security.core.userdetails.User userDetails, @PathVariable int page) throws Exception{
     RPCClient rpcClient = new RPCClient("in-progress");
     HistoryRequest historyRequest = new HistoryRequest(userDetails.getUsername(),page);
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(historyRequest));
 
-    try {
-      List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
-      return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
-    } catch (Exception e){
-      return new ResponseEntity<>(new SimpleResponseWrapper(404, responseMQ), HttpStatus.NOT_FOUND);
-    }
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(historyRequest));
+    List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
+    return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
   }
 
   //get all completed transaction from current user
@@ -112,13 +108,9 @@ public class TransactionController {
   public ResponseEntity<?> getCompleted(@CurrentUser org.springframework.security.core.userdetails.User userDetails, @PathVariable int page) throws Exception{
     RPCClient rpcClient = new RPCClient("completed");
     HistoryRequest historyRequest = new HistoryRequest(userDetails.getUsername(),page);
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(historyRequest));
 
-    try {
-      List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
-      return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
-    } catch (Exception e){
-      return new ResponseEntity<>(new SimpleResponseWrapper(404, responseMQ), HttpStatus.NOT_FOUND);
-    }
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(historyRequest));
+    List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
+    return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
   }
 }

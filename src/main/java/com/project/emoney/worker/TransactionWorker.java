@@ -104,7 +104,7 @@ public class TransactionWorker {
 
     int start = (historyRequest.getPage()-1)*10;
     if (start>=transactionList.size()){
-      return "not found";
+      return objectMapper.writeValueAsString(new ArrayList<TransactionDTO>());
     }
     int end = start + 10;
     if (end>transactionList.size()){
@@ -143,7 +143,7 @@ public class TransactionWorker {
 
     int start = (historyRequest.getPage()-1)*10;
     if (start>=transactionList.size()){
-      return "not found";
+      return objectMapper.writeValueAsString(new ArrayList<TransactionDTO>());
     }
     int end = start + 10;
     if (end>transactionList.size()){
