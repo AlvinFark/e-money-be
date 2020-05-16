@@ -13,6 +13,7 @@ import com.project.emoney.payload.response.SimpleResponseWrapper;
 import com.project.emoney.security.CurrentUser;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
+import com.project.emoney.worker.TransactionWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,13 +31,17 @@ public class TransactionController {
   @Autowired
   private Validation validation;
 
+  @Autowired
+  private TransactionWorker transactionWorker;
+
   @DeleteMapping("/{id}")
   public ResponseEntity<?> cancel(
       @CurrentUser org.springframework.security.core.userdetails.User userDetails,
       @PathVariable long id) throws Exception {
     CancelRequest cancelRequest = new CancelRequest(id, userDetails.getUsername());
-    RPCClient rpcClient = new RPCClient("cancelTransaction");
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(cancelRequest));
+//    RPCClient rpcClient = new RPCClient("cancelTransaction");
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(cancelRequest));
+    String responseMQ = transactionWorker.cancel(objectMapper.writeValueAsString(cancelRequest));
     switch (responseMQ) {
       case "success":
         return new ResponseEntity<>(new SimpleResponseWrapper(200, responseMQ), HttpStatus.OK);
@@ -71,8 +76,9 @@ public class TransactionController {
     transactionRequest.setEmail(userDetails.getUsername());
 
     //send and receive from MQ
-    RPCClient rpcClient = new RPCClient("transaction");
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(transactionRequest));
+//    RPCClient rpcClient = new RPCClient("transaction");
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(transactionRequest));
+    String responseMQ = transactionWorker.createTransaction(objectMapper.writeValueAsString(transactionRequest));
 
     //translate MQ response
     try {
@@ -95,10 +101,11 @@ public class TransactionController {
   //get all in progress transaction from current user
   @GetMapping("/in-progress/{page}")
   public ResponseEntity<?> getInProgress(@CurrentUser org.springframework.security.core.userdetails.User userDetails, @PathVariable int page) throws Exception{
-    RPCClient rpcClient = new RPCClient("in-progress");
+//    RPCClient rpcClient = new RPCClient("in-progress");
     HistoryRequest historyRequest = new HistoryRequest(userDetails.getUsername(),page);
 
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(historyRequest));
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(historyRequest));
+    String responseMQ = transactionWorker.transactionInProgress(objectMapper.writeValueAsString(historyRequest));
     List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
     return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
   }
@@ -106,10 +113,11 @@ public class TransactionController {
   //get all completed transaction from current user
   @GetMapping("/completed/{page}")
   public ResponseEntity<?> getCompleted(@CurrentUser org.springframework.security.core.userdetails.User userDetails, @PathVariable int page) throws Exception{
-    RPCClient rpcClient = new RPCClient("completed");
+//    RPCClient rpcClient = new RPCClient("completed");
     HistoryRequest historyRequest = new HistoryRequest(userDetails.getUsername(),page);
 
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(historyRequest));
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(historyRequest));
+    String responseMQ = transactionWorker.transactionCompleted(objectMapper.writeValueAsString(historyRequest));
     List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
     return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
   }

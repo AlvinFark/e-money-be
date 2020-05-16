@@ -18,16 +18,16 @@ public class EmoneyApplication implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
-    worker.run("login");
-    worker.run("register");
-    worker.run("in-progress");
-    worker.run("completed");
-    worker.run("profile");
-    worker.run("profile");
-    worker.run("otp");
-    worker.run("verify");
-    worker.run("password");
-    worker.run("cancelTransaction");
-    worker.run("transaction");
+//    worker.run("login");
+//    worker.run("register");
+//    worker.run("in-progress");
+//    worker.run("completed");
+//    worker.run("profile");
+//    worker.run("profile");
+//    worker.run("otp");
+//    worker.run("verify");
+//    worker.run("password");
+//    worker.run("cancelTransaction");
+//    worker.run("transaction");
   }
 }

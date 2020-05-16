@@ -9,6 +9,7 @@ import com.project.emoney.payload.response.SimpleResponseWrapper;
 import com.project.emoney.service.UserService;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
+import com.project.emoney.worker.AuthWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,9 @@ public class AuthController {
 
   @Autowired
   private PasswordEncoder passwordEncoder;
+
+  @Autowired
+  private AuthWorker authWorker;
 
   @RequestMapping(value = "/api/register", method = RequestMethod.POST)
   public ResponseEntity<?> saveUser(@RequestBody User user) throws Exception {
@@ -61,8 +65,9 @@ public class AuthController {
 //    }
 
     //send and receive MQ
-    RPCClient rpcClient = new RPCClient("register");
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(user));
+//    RPCClient rpcClient = new RPCClient("register");
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(user));
+    String responseMQ = authWorker.register(objectMapper.writeValueAsString(user));
 
     //translate MQ response
     return new ResponseEntity<>(new SimpleResponseWrapper(201, responseMQ), HttpStatus.CREATED);
@@ -84,8 +89,9 @@ public class AuthController {
     }
 
     //send and receive MQ
-    RPCClient rpcClient = new RPCClient("login");
-    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
+//    RPCClient rpcClient = new RPCClient("login");
+//    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
+    String responseMQ = authWorker.login(objectMapper.writeValueAsString(loginRequest));
 
     //translate MQ response
     switch (responseMQ) {
