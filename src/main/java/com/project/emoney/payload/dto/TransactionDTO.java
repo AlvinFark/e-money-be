@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionDTO {
-  long id;
-  long userId;
-  String cardNumber;
-  long value;
-  long fee;
-  Status status;
-  TransactionMethod method;
-  String time;
-  String expiry;
+  private long id;
+  private long userId;
+  private String cardNumber;
+  private long value;
+  private long fee;
+  private Status status;
+  private TransactionMethod method;
+  private String time;
+  private String expiry;
 
   public TransactionDTO(Transaction transaction) {
     this.id = transaction.getId();

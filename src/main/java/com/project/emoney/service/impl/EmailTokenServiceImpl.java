@@ -12,36 +12,35 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class EmailTokenServiceImpl implements EmailTokenService {
 
   @Autowired
-  EmailTokenMapper emailTokenMapper;
+  private EmailTokenMapper emailTokenMapper;
 
   @Autowired
-  Generator generator;
+  private Generator generator;
 
   @Autowired
-  JavaMailSender javaMailSender;
+  private JavaMailSender javaMailSender;
 
   @Override
-  public void createVerificationToken(User user, String token) {
+  public void insertByUserAndToken(User user, String token) {
     EmailToken newUserToken = new EmailToken(token, user);
-    emailTokenMapper.createToken(newUserToken);
+    emailTokenMapper.insert(newUserToken);
   }
 
   @Override
-  public EmailToken getVerificationToken(String verificationToken) {
-    return emailTokenMapper.findTokenByToken(verificationToken);
+  public EmailToken getByToken(String verificationToken) {
+    return emailTokenMapper.getByToken(verificationToken);
   }
 
   @Override
   public String sendEmail(User user) {
     try {
       String token = generator.generateToken();
-      createVerificationToken(user,token);
+      insertByUserAndToken(user,token);
       MimeMessage message = javaMailSender.createMimeMessage();
       MimeMessageHelper helper = new MimeMessageHelper(message, true);
       helper.setSubject("Please confirm your new e-Money App account");

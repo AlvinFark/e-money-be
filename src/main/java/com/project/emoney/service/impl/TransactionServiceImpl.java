@@ -51,7 +51,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void saveTransaction(TransactionRequest transactionRequest, User user, TopUpOption topUpOption, Status status) {
+    public void insertByTransactionRequestAndUserAndTopUpOptionAndStatus(TransactionRequest transactionRequest, User user, TopUpOption topUpOption, Status status) {
         Transaction transaction = new Transaction( user.getId(), transactionRequest.getCardNumber(), topUpOption.getValue(),
             topUpOption.getFee(), status, transactionRequest.getMethod(), LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_DB_HOURS),
             LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_DB_HOURS +GlobalVariable.TRANSACTION_LIFETIME_HOURS));

@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OTP {
-  long id;
-  String emailOrPhone;
-  String code;
-  LocalDateTime time;
+  private long id;
+  private String emailOrPhone;
+  private String code;
+  private LocalDateTime time;
 }

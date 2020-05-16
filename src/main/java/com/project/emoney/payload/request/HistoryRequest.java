@@ -1,4 +1,4 @@
-package com.project.emoney.entity;
+package com.project.emoney.payload.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TopUpOption {
-    private long id;
-    private long value;
-    private long fee;
+public class HistoryRequest {
+  private String username;
+  private int page;
 }

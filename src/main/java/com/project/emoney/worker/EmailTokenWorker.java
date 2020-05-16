@@ -14,21 +14,21 @@ import java.time.LocalDateTime;
 public class EmailTokenWorker {
 
   @Autowired
-  EmailTokenService emailTokenService;
+  private EmailTokenService emailTokenService;
 
   @Autowired
-  UserService userService;
+  private UserService userService;
 
   public String verify(String token){
-    EmailToken emailToken = emailTokenService.getVerificationToken(token);
+    EmailToken emailToken = emailTokenService.getByToken(token);
     if (emailToken==null){
       return "invalid code";
     }
     if (emailToken.getTime().plusHours(GlobalVariable.EMAILTOKEN_LIFETIME_HOURS).isBefore(LocalDateTime.now())){
       return "expired code";
     }
-    User user = userService.getUserById(emailToken.getUserId());
-    userService.activateUser(user);
+    User user = userService.getById(emailToken.getUserId());
+    userService.activate(user);
     return "success";
   }
 }

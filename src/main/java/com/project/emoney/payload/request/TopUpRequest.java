@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TopUpRequest {
-  String number;
-  long value;
+  private String number;
+  private long value;
 }

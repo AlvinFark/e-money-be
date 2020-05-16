@@ -3,20 +3,17 @@ package com.project.emoney.worker;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.*;
+import com.project.emoney.payload.dto.TransactionDTO;
 import com.project.emoney.payload.request.CancelRequest;
-import com.project.emoney.payload.response.SimpleResponseWrapper;
+import com.project.emoney.payload.request.HistoryRequest;
+import com.project.emoney.payload.request.TopUpRequest;
+import com.project.emoney.payload.request.TransactionRequest;
 import com.project.emoney.service.AsyncAdapterService;
-import com.project.emoney.service.TopUpOptionService;
 import com.project.emoney.service.TransactionService;
 import com.project.emoney.service.UserService;
-import com.project.emoney.payload.request.TopUpRequest;
-import com.project.emoney.payload.dto.TransactionDTO;
-import com.project.emoney.payload.request.TransactionRequest;
 import com.project.emoney.utils.GlobalVariable;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -27,19 +24,16 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class TransactionWorker {
 
-  ObjectMapper objectMapper = new ObjectMapper();
+  final ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired
-  UserService userService;
+  private UserService userService;
 
   @Autowired
-  TopUpOptionService topUpOptionService;
+  private TransactionService transactionService;
 
   @Autowired
-  TransactionService transactionService;
-
-  @Autowired
-  AsyncAdapterService asyncAdapterService;
+  private AsyncAdapterService asyncAdapterService;
 
   private final OkHttpClient httpClient = new OkHttpClient();
   public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -53,6 +47,9 @@ public class TransactionWorker {
     TopUpOption topUpOption = topUpOptionCompletableFuture.get();
 
     CompletableFuture.allOf(userCompletableFuture,topUpOptionCompletableFuture);
+    if (topUpOption==null) {
+      return "top up option not found";
+    }
     if (transactionRequest.getMethod()==TransactionMethod.WALLET){
       //chek balance
       if (user.getBalance()<=0||user.getBalance()<topUpOption.getValue()+topUpOption.getFee()){
@@ -79,12 +76,13 @@ public class TransactionWorker {
         return "can't reach 3rd party server, try again";
       }
     }
-    transactionService.saveTransaction(transactionRequest, user, topUpOption, Status.IN_PROGRESS);
+    transactionService.insertByTransactionRequestAndUserAndTopUpOptionAndStatus(transactionRequest, user, topUpOption, Status.IN_PROGRESS);
     return "success";
   }
 
   public String transactionInProgress(String message) throws JsonProcessingException {
-    User user = userService.getUserByEmail(message);
+    HistoryRequest historyRequest = objectMapper.readValue(message, HistoryRequest.class);
+    User user = userService.getByEmail(historyRequest.getUsername());
 
     List<Transaction> list = transactionService.getInProgressByUserId(user.getId());
 
@@ -92,22 +90,32 @@ public class TransactionWorker {
     List<TransactionDTO> transactionList = new ArrayList<TransactionDTO>();
 
     for (Transaction transaction: list) {
-        LocalDateTime expiredTime = transaction.getExpiry();
-        LocalDateTime localDateTime = LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_APP_HOURS);
-        int compareValue = expiredTime.compareTo(localDateTime);
-        if(compareValue > 0) {
-          //Add to list in-progress
-          transactionList.add(new TransactionDTO(transaction));
-        } else {
-          //Move from in-progress
-          transactionService.updateStatusById(transaction.getId(), Status.FAILED);
-        }
+      LocalDateTime expiredTime = transaction.getExpiry();
+      LocalDateTime localDateTime = LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_APP_HOURS);
+      int compareValue = expiredTime.compareTo(localDateTime);
+      if(compareValue > 0) {
+        //Add to list in-progress
+        transactionList.add(new TransactionDTO(transaction));
+      } else {
+        //Move from in-progress
+        transactionService.updateStatusById(transaction.getId(), Status.FAILED);
+      }
     }
-    return objectMapper.writeValueAsString(transactionList);
+
+    int start = (historyRequest.getPage()-1)*10;
+    if (start>=transactionList.size()){
+      return "not found";
+    }
+    int end = start + 10;
+    if (end>transactionList.size()){
+      end = transactionList.size();
+    }
+    return objectMapper.writeValueAsString(transactionList.subList(start,end));
   }
 
-  public String transactionCompleted(String email) throws JsonProcessingException {
-    User user = userService.getUserByEmail(email);
+  public String transactionCompleted(String message) throws JsonProcessingException {
+    HistoryRequest historyRequest = objectMapper.readValue(message, HistoryRequest.class);
+    User user = userService.getByEmail(historyRequest.getUsername());
 
     List<Transaction> list = transactionService.getAllByUserId(user.getId());
 
@@ -132,12 +140,21 @@ public class TransactionWorker {
         transactionList.add(new TransactionDTO(transaction));
       }
     }
-    return objectMapper.writeValueAsString(transactionList);
+
+    int start = (historyRequest.getPage()-1)*10;
+    if (start>=transactionList.size()){
+      return "not found";
+    }
+    int end = start + 10;
+    if (end>transactionList.size()){
+      end = transactionList.size();
+    }
+    return objectMapper.writeValueAsString(transactionList.subList(start,end));
   }
 
   public String cancel(String message) throws JsonProcessingException {
     CancelRequest cancelRequest = objectMapper.readValue(message, CancelRequest.class);
-    User user = userService.getUserByEmail(cancelRequest.getUserEmail());
+    User user = userService.getByEmail(cancelRequest.getUserEmail());
 
     try {
       Transaction transaction = transactionService.getById(cancelRequest.getId());

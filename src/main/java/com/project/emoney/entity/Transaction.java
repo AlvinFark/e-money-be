@@ -10,16 +10,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Transaction {
-  long id;
-  long userId;
-  String cardNumber;
-  long value;
-  long fee;
-  Status status;
-  TransactionMethod method;
-  LocalDateTime time;
-  LocalDateTime expiry;
-  String imagePath;
+  private long id;
+  private long userId;
+  private String cardNumber;
+  private long value;
+  private long fee;
+  private Status status;
+  private TransactionMethod method;
+  private LocalDateTime time;
+  private LocalDateTime expiry;
+  private String imagePath;
 
   public Transaction(long userId, String cardNumber, long value, long fee, Status status, TransactionMethod method, LocalDateTime time, LocalDateTime expiry) {
     this.userId = userId;
