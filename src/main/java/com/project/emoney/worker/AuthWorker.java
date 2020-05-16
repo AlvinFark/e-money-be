@@ -51,13 +51,8 @@ public class AuthWorker {
     log.info("[register]  Receive register request for email: " + userRequest.getEmail() + " and phone: " + userRequest.getPhone());
 
     User user;
-    try {
-      //save user
-      user = userService.insert(userRequest);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return "too many connections";
-    }
+    //save user
+    user = userService.insert(userRequest);
     CompletableFuture<String> statusOtp = asyncAdapterService.sendEmail(user);
     CompletableFuture<String> statusEmail = asyncAdapterService.sendOtp(user.getPhone());
     CompletableFuture.allOf(statusOtp,statusEmail).join();
@@ -80,9 +75,6 @@ public class AuthWorker {
       authenticate(loginRequest.getEmailOrPhone(), loginRequest.getPassword());
     } catch (BadCredentialsException e) {
       return "bad credentials";
-    } catch (Exception e) {
-      e.printStackTrace();
-      return "too many connections";
     }
     final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
     User user = userService.getByEmail(userDetails.getUsername());

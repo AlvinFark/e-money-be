@@ -65,9 +65,6 @@ public class AuthController {
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(user));
 
     //translate MQ response
-    if (responseMQ.equals("too many connections")) {
-      return new ResponseEntity<>(new SimpleResponseWrapper(429, responseMQ), HttpStatus.TOO_MANY_REQUESTS);
-    }
     return new ResponseEntity<>(new SimpleResponseWrapper(201, responseMQ), HttpStatus.CREATED);
   }
 
@@ -98,8 +95,6 @@ public class AuthController {
         return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
       case "unverified number, can't send otp":
         return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ+", use email verification or master key"), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
-      case "too many connections":
-        return new ResponseEntity<>(new SimpleResponseWrapper(429, responseMQ), HttpStatus.TOO_MANY_REQUESTS);
       default:
         UserWithToken userWithToken = objectMapper.readValue(responseMQ, UserWithToken.class);
         return new ResponseEntity<>(new ResponseWrapper(202, "accepted", userWithToken), HttpStatus.ACCEPTED);

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class OTPWorker {
@@ -72,10 +73,8 @@ public class OTPWorker {
       //return dan set active
       userService.setActiveByEmail(user.getEmail());
       return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
-    } catch (UsernameNotFoundException e) {
+    } catch (UsernameNotFoundException | InterruptedException | ExecutionException e) {
       return "user not found";
-    } catch (Exception e) {
-      return "too many connections";
     }
   }
 }
