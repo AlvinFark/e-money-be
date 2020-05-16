@@ -6,6 +6,7 @@ import com.project.emoney.entity.User;
 import com.project.emoney.payload.dto.TransactionDTO;
 import com.project.emoney.payload.dto.UserWrapper;
 import com.project.emoney.payload.request.CancelRequest;
+import com.project.emoney.payload.request.HistoryRequest;
 import com.project.emoney.payload.request.TransactionRequest;
 import com.project.emoney.payload.response.ResponseWrapper;
 import com.project.emoney.payload.response.SimpleResponseWrapper;
@@ -92,22 +93,32 @@ public class TransactionController {
   }
 
   //get all in progress transaction from current user
-  @GetMapping("/in-progress")
-  public ResponseEntity<?> getInProgress(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
+  @GetMapping("/in-progress/{page}")
+  public ResponseEntity<?> getInProgress(@CurrentUser org.springframework.security.core.userdetails.User userDetails, @PathVariable int page) throws Exception{
     RPCClient rpcClient = new RPCClient("in-progress");
-    String responseMQ = rpcClient.call(userDetails.getUsername());
+    HistoryRequest historyRequest = new HistoryRequest(userDetails.getUsername(),page);
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(historyRequest));
 
-    List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
-    return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
+    try {
+      List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
+      return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
+    } catch (Exception e){
+      return new ResponseEntity<>(new SimpleResponseWrapper(404, responseMQ), HttpStatus.NOT_FOUND);
+    }
   }
 
   //get all completed transaction from current user
-  @GetMapping("/completed")
-  public ResponseEntity<?> getCompleted(@CurrentUser org.springframework.security.core.userdetails.User userDetails) throws Exception{
+  @GetMapping("/completed/{page}")
+  public ResponseEntity<?> getCompleted(@CurrentUser org.springframework.security.core.userdetails.User userDetails, @PathVariable int page) throws Exception{
     RPCClient rpcClient = new RPCClient("completed");
-    String responseMQ = rpcClient.call(userDetails.getUsername());
+    HistoryRequest historyRequest = new HistoryRequest(userDetails.getUsername(),page);
+    String responseMQ = rpcClient.call(objectMapper.writeValueAsString(historyRequest));
 
-    List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
-    return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
+    try {
+      List<TransactionDTO> list = objectMapper.readValue(responseMQ, new TypeReference<List<TransactionDTO>>() {});
+      return new ResponseEntity<>(new ResponseWrapper(200, "success", list), HttpStatus.OK);
+    } catch (Exception e){
+      return new ResponseEntity<>(new SimpleResponseWrapper(404, responseMQ), HttpStatus.NOT_FOUND);
+    }
   }
 }

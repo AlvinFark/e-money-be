@@ -4,12 +4,11 @@ spring:
     url: jdbc:mysql://ec2-3-95-185-42.compute-1.amazonaws.com:3306/team6
     username: root
     password: G2labDana123*
-#    url: jdbc:mysql://b256b206ac8263:7f7b13ed@us-cdbr-east-06.cleardb.net/heroku_48cf622b47df9e1?reconnect=true
-#    username: b256b206ac8263
-#    password: 7f7b13ed
     tomcat:
       test-on-borrow: true
       validation-query: SELECT 1
+    hikari:
+      maximum-pool-size: 10
 
   servlet:
     multipart:
@@ -17,8 +16,6 @@ spring:
       max-request-size: 1024KB
 
   main:
-    hikari:
-      maximum-pool-size: 10
     banner-mode: off
 
   mail:
@@ -33,8 +30,8 @@ spring:
       mail.smtp.writetimeout: 5000
       mail.smtp.starttls.enable: true
 
-  server:
-    port: 9706
+server:
+  port: 9706
 
 phoneNumber:
 twilioAccountSid:
