@@ -15,13 +15,13 @@ public class TopUpOptionServiceImpl implements TopUpOptionService {
     private TopUpOptionMapper topUpOptionMapper;
 
     @Override
-    public void createTopUpOption(TopUpOption topUpOption) {
-        topUpOptionMapper.createTopUpOption(topUpOption);
+    public void insert(TopUpOption topUpOption) {
+        topUpOptionMapper.insert(topUpOption);
     }
 
     @Override
-    public List<TopUpOption> getListTopUpOption() {
-        return topUpOptionMapper.getAllTopUpOption();
+    public List<TopUpOption> getAll() {
+        return topUpOptionMapper.getAll();
     }
 
     @Override

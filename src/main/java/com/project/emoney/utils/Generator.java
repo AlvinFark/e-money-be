@@ -8,7 +8,7 @@ import java.util.Random;
 public class Generator {
 
   private static final String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  Random random = new Random();
+  final Random random = new Random();
 
   public String generateOtp() {
     return String.format("%04d", random.nextInt(10000));

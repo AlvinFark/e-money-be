@@ -16,5 +16,5 @@ public interface TransactionService {
     void insert(Transaction transaction);
     void updateStatusById(long id, Status status);
     void setExtensionById(long id, String extension);
-    void saveTransaction(TransactionRequest transactionRequest, User user, TopUpOption topUpOption, Status status);
+    void insertByTransactionRequestAndUserAndTopUpOptionAndStatus(TransactionRequest transactionRequest, User user, TopUpOption topUpOption, Status status);
 }

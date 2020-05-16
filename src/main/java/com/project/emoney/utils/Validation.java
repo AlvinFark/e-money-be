@@ -6,8 +6,8 @@ import java.util.regex.Pattern;
 
 @Component
 public class Validation {
-  String emailRegex = ".+@.+\\..+";
-  String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=\\S+$).{8,}$";
+  final String emailRegex = ".+@.+\\..+";
+  final String passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=\\S+$).{8,}$";
 
   public boolean email (String email) {
     return Pattern.matches(emailRegex, email);

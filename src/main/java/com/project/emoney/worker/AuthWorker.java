@@ -2,14 +2,14 @@ package com.project.emoney.worker;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.emoney.service.AsyncAdapterService;
 import com.project.emoney.entity.User;
-import com.project.emoney.service.OTPService;
-import com.project.emoney.service.UserService;
-import com.project.emoney.payload.request.LoginRequest;
 import com.project.emoney.payload.dto.UserWithToken;
+import com.project.emoney.payload.request.LoginRequest;
 import com.project.emoney.security.JwtTokenUtil;
 import com.project.emoney.security.JwtUserDetailsService;
+import com.project.emoney.service.AsyncAdapterService;
+import com.project.emoney.service.OTPService;
+import com.project.emoney.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class AuthWorker {
   @Autowired
   private OTPService otpService;
 
-  ObjectMapper objectMapper = new ObjectMapper();
+  final ObjectMapper objectMapper = new ObjectMapper();
   private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   public String register(String message) throws JsonProcessingException, ExecutionException, InterruptedException {
@@ -72,7 +72,7 @@ public class AuthWorker {
     }
   }
 
-  public String login(String message) throws JsonProcessingException, ExecutionException, InterruptedException {
+  public String login(String message) throws JsonProcessingException {
     LoginRequest loginRequest = objectMapper.readValue(message, LoginRequest.class);
     log.info("[login]  Receive login request for email or phone: " + loginRequest.getEmailOrPhone());
     try {
@@ -85,7 +85,7 @@ public class AuthWorker {
       return "too many connections";
     }
     final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
-    User user = userService.getUserByEmail(userDetails.getUsername());
+    User user = userService.getByEmail(userDetails.getUsername());
     //if already active, then return token
     if (user.isActive()) {
       return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));

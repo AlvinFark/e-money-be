@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SimpleResponseWrapper {
-  int code;
-  String message;
+  private int code;
+  private String message;
 }

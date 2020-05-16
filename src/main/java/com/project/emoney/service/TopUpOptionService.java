@@ -5,7 +5,7 @@ import com.project.emoney.entity.TopUpOption;
 import java.util.List;
 
 public interface TopUpOptionService {
-    void createTopUpOption(TopUpOption topUpOption);
-    List<TopUpOption> getListTopUpOption();
+    void insert(TopUpOption topUpOption);
+    List<TopUpOption> getAll();
     TopUpOption getById(long id);
 }

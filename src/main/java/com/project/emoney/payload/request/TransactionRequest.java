@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionRequest {
-  String cardNumber;
-  long idTopUpOption;
-  TransactionMethod method;
-  String email;
+  private String cardNumber;
+  private long idTopUpOption;
+  private TransactionMethod method;
+  private String email;
 }

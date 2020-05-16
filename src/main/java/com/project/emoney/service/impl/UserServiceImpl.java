@@ -13,23 +13,23 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     @Override
-    public User getUserById(long id) {
-        return userMapper.getUserById(id);
+    public User getById(long id) {
+        return userMapper.getById(id);
     }
 
     @Override
-    public User getUserByEmailOrPhone(String emailOrPhone) {
-        return userMapper.getUserByEmailOrPhone(emailOrPhone);
+    public User getByEmailOrPhone(String emailOrPhone) {
+        return userMapper.getByEmailOrPhone(emailOrPhone);
     }
 
     public User insert(User user) {
         userMapper.insert(user);
-        return getUserByEmailOrPhone(user.getPhone());
+        return getByEmailOrPhone(user.getPhone());
     }
 
     @Override
-    public User getUserByEmail(String email) {
-        return userMapper.getUserByEmail(email);
+    public User getByEmail(String email) {
+        return userMapper.getByEmail(email);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void activateUser(User user) {
-        userMapper.activateUser(user);
+    public void activate(User user) {
+        userMapper.activate(user);
     }
 }

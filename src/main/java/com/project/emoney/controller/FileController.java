@@ -4,10 +4,10 @@ import com.project.emoney.entity.Status;
 import com.project.emoney.entity.Transaction;
 import com.project.emoney.entity.TransactionMethod;
 import com.project.emoney.entity.User;
-import com.project.emoney.service.TransactionService;
-import com.project.emoney.service.UserService;
 import com.project.emoney.payload.response.SimpleResponseWrapper;
 import com.project.emoney.security.CurrentUser;
+import com.project.emoney.service.TransactionService;
+import com.project.emoney.service.UserService;
 import com.project.emoney.utils.FTPBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,17 +20,17 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileController {
 
   @Autowired
-  UserService userService;
+  private UserService userService;
 
   @Autowired
-  TransactionService transactionService;
+  private TransactionService transactionService;
 
   @PostMapping("/transaction/upload/{idTransaction}")
   public ResponseEntity<?> uploadBukti(@CurrentUser org.springframework.security.core.userdetails.User userDetails,
                                        @PathVariable long idTransaction,
                                        @RequestParam("file") MultipartFile file) {
     //get user and transaction details
-    User user = userService.getUserByEmail(userDetails.getUsername());
+    User user = userService.getByEmail(userDetails.getUsername());
 
     try {
       Transaction transaction = transactionService.getById(idTransaction);

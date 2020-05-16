@@ -4,13 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.OTP;
 import com.project.emoney.entity.User;
+import com.project.emoney.payload.dto.UserWithToken;
+import com.project.emoney.payload.request.OTPRequest;
+import com.project.emoney.security.JwtTokenUtil;
 import com.project.emoney.service.AsyncAdapterService;
 import com.project.emoney.service.OTPService;
 import com.project.emoney.service.UserService;
-import com.project.emoney.payload.request.OTPRequest;
-import com.project.emoney.payload.dto.UserWithToken;
-import com.project.emoney.security.JwtTokenUtil;
-import com.project.emoney.security.JwtUserDetailsService;
 import com.project.emoney.utils.GlobalVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +36,8 @@ public class OTPWorker {
   @Autowired
   private AsyncAdapterService asyncAdapterService;
 
-  ObjectMapper objectMapper = new ObjectMapper();
-  private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
+  final ObjectMapper objectMapper = new ObjectMapper();
+  private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   public String send(String message) throws JsonProcessingException {
     OTPRequest otpRequest = objectMapper.readValue(message, OTPRequest.class);

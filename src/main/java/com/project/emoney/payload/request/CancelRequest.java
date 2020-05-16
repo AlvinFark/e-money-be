@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CancelRequest {
-  long id;
-  String userEmail;
+  private long id;
+  private String userEmail;
 }

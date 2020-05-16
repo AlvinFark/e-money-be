@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface OTPMapper {
 
   @Insert("INSERT INTO otp (emailOrPhone, code, time) VALUES (#{emailOrPhone}, #{code}, #{time})")
-  void create(OTP otp);
+  void insert(OTP otp);
 
   @Select("SELECT * FROM otp WHERE CODE = #{code} ORDER BY time DESC LIMIT 1")
   OTP getByCodeOrderByTimeDesc(String code);

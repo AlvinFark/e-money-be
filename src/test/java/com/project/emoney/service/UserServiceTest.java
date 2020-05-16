@@ -1,5 +1,5 @@
 package com.project.emoney.service;
-;
+
 import com.project.emoney.entity.User;
 import com.project.emoney.mapper.UserMapper;
 import com.project.emoney.service.impl.UserServiceImpl;
@@ -11,6 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.mockito.Mockito.*;
+
+;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -38,8 +40,8 @@ public class UserServiceTest {
   public void getUserByIdTest() {
     final long id = 1;
     final User expected = getUser();
-    when(userMapper.getUserById(id)).thenReturn(expected);
-    final User user = userService.getUserById(id);
+    when(userMapper.getById(id)).thenReturn(expected);
+    final User user = userService.getById(id);
     assert user.equals(expected);
   }
 
@@ -48,10 +50,10 @@ public class UserServiceTest {
     final String email = "dwight@dundermifflin.co";
     final String phone = "628595839538";
     final User expected = getUser();
-    when(userMapper.getUserByEmailOrPhone(email)).thenReturn(expected);
-    when(userMapper.getUserByEmailOrPhone(phone)).thenReturn(expected);
-    final User userEmail = userService.getUserByEmailOrPhone(email);
-    final User userPhone = userService.getUserByEmailOrPhone(phone);
+    when(userMapper.getByEmailOrPhone(email)).thenReturn(expected);
+    when(userMapper.getByEmailOrPhone(phone)).thenReturn(expected);
+    final User userEmail = userService.getByEmailOrPhone(email);
+    final User userPhone = userService.getByEmailOrPhone(phone);
     assert userEmail.equals(expected);
     assert userPhone.equals(expected);
   }
@@ -67,8 +69,8 @@ public class UserServiceTest {
   public void getUserByEmailTest() {
     final String email = "dwight@dundermifflin.co";
     final User expected = getUser();
-    when(userMapper.getUserByEmail(email)).thenReturn(expected);
-    final User user = userService.getUserByEmail(email);
+    when(userMapper.getByEmail(email)).thenReturn(expected);
+    final User user = userService.getByEmail(email);
     assert user.equals(expected);
   }
 
@@ -96,7 +98,7 @@ public class UserServiceTest {
   @Test
   public void activateUserTest() {
     final User user = getUser();
-    userService.activateUser(user);
-    verify(userMapper, times(1)).activateUser(user);
+    userService.activate(user);
+    verify(userMapper, times(1)).activate(user);
   }
 }

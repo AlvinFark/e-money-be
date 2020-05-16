@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -57,7 +57,7 @@ public class AsyncAdapterService {
   @Async("asyncExecutor")
   public CompletableFuture<User> getUserByEmailOrPhone(String emailOrPhone) {
     log.info("getting user by email or phone started");
-    User user = userService.getUserByEmailOrPhone(emailOrPhone);
+    User user = userService.getByEmailOrPhone(emailOrPhone);
     log.info("getting user by email or phone success");
     return CompletableFuture.completedFuture(user);
   }
@@ -65,7 +65,7 @@ public class AsyncAdapterService {
   @Async("asyncExecutor")
   public CompletableFuture<User> getUserByEmail(String email) {
     log.info("getting user by email started");
-    User user = userService.getUserByEmail(email);
+    User user = userService.getByEmail(email);
     log.info("getting user by email success");
     return CompletableFuture.completedFuture(user);
   }
@@ -89,7 +89,7 @@ public class AsyncAdapterService {
   @Async("asyncExecutor")
   public CompletableFuture<Void> saveTransaction(TransactionRequest transactionRequest, User user, TopUpOption topUpOption, Status status) {
     log.info("saving transaction started");
-    transactionService.saveTransaction(transactionRequest,user,topUpOption,status);
+    transactionService.insertByTransactionRequestAndUserAndTopUpOptionAndStatus(transactionRequest,user,topUpOption,status);
     log.info("saving transaction success");
     return CompletableFuture.completedFuture(null);
   }

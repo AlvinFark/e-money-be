@@ -1,39 +1,33 @@
 package com.project.emoney.worker;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.emoney.payload.dto.MQRequestWrapper;
 import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
 @Component
 public class Worker {
 
   @Autowired
-  AuthWorker authWorker;
+  private AuthWorker authWorker;
 
   @Autowired
-  UserWorker userWorker;
+  private UserWorker userWorker;
 
   @Autowired
-  OTPWorker otpWorker;
+  private OTPWorker otpWorker;
 
   @Autowired
-  TransactionWorker transactionWorker;
+  private TransactionWorker transactionWorker;
 
   @Autowired
-  EmailTokenWorker emailTokenWorker;
+  private EmailTokenWorker emailTokenWorker;
 
-  ObjectMapper objectMapper = new ObjectMapper();
-  private static Logger log = LoggerFactory.getLogger(AuthWorker.class);
+  private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   @Async("workerExecutor")
   public void run(String QUEUE_NAME) {
