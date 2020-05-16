@@ -1,42 +1,34 @@
 package com.project.emoney.controller;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.emoney.entity.EmailToken;
 import com.project.emoney.entity.User;
-import com.project.emoney.payload.response.ResponseWrapper;
-import com.project.emoney.service.UserService;
-import com.project.emoney.payload.response.SimpleResponseWrapper;
-import com.project.emoney.payload.request.LoginRequest;
 import com.project.emoney.payload.dto.UserWithToken;
+import com.project.emoney.payload.request.LoginRequest;
+import com.project.emoney.payload.response.ResponseWrapper;
+import com.project.emoney.payload.response.SimpleResponseWrapper;
+import com.project.emoney.service.UserService;
 import com.project.emoney.utils.RPCClient;
 import com.project.emoney.utils.Validation;
-import com.project.emoney.worker.AuthWorker;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Locale;
-
 @RestController
 @CrossOrigin
 public class AuthController {
 
-  ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired
-  Validation validation;
+  private Validation validation;
 
   @Autowired
   private UserService userService;
 
   @Autowired
-  PasswordEncoder passwordEncoder;
-
-  @Autowired
-  AuthWorker authWorker;
+  private PasswordEncoder passwordEncoder;
 
   @RequestMapping(value = "/api/register", method = RequestMethod.POST)
   public ResponseEntity<?> saveUser(@RequestBody User user) throws Exception {
@@ -71,7 +63,6 @@ public class AuthController {
     //send and receive MQ
     RPCClient rpcClient = new RPCClient("register");
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(user));
-//    String responseMQ = authWorker.register(objectMapper.writeValueAsString(user));
 
     //translate MQ response
     if (responseMQ.equals("too many connections")) {
@@ -98,7 +89,6 @@ public class AuthController {
     //send and receive MQ
     RPCClient rpcClient = new RPCClient("login");
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(loginRequest));
-//    String responseMQ = authWorker.login(objectMapper.writeValueAsString(loginRequest));
 
     //translate MQ response
     switch (responseMQ) {

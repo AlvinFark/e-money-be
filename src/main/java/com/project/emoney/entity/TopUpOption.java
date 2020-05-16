@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TopUpOption {
-    long id;
-    long value;
-    long fee;
+    private long id;
+    private long value;
+    private long fee;
 }

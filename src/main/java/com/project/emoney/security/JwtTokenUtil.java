@@ -3,7 +3,6 @@ package com.project.emoney.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,7 @@ import java.util.function.Function;
 public class JwtTokenUtil implements Serializable {
 
   private static final long serialVersionUID = -2550185165626007488L;
-  public static final long JWT_TOKEN_VALIDITY = 30 * 60 * 60;
+  private static final long JWT_TOKEN_VALIDITY = 30 * 60 * 60;
 
   private final String secret = "superverysecreykey";
 

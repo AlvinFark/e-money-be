@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class EmoneyApplication implements CommandLineRunner {
 
   @Autowired
-  Worker worker;
+  private Worker worker;
 
   public static void main(String[] args) {
     SpringApplication.run(EmoneyApplication.class, args);

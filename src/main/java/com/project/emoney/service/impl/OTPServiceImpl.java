@@ -14,24 +14,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class OTPServiceImpl implements OTPService {
 
   @Autowired
-  OTPMapper otpMapper;
+  private OTPMapper otpMapper;
 
   @Autowired
-  Generator generator;
+  private Generator generator;
 
   @Value("${phoneNumber}") private String myTwilioPhoneNumber;
   @Value("${twilioAccountSid}") private String twilioAccountSid;
   @Value("${twilioAuthToken}") private String twilioAuthToken;
 
   @Override
-  public void create(OTP otp) {
-    otpMapper.create(otp);
+  public void insert(OTP otp) {
+    otpMapper.insert(otp);
   }
 
   @Override
@@ -53,7 +52,7 @@ public class OTPServiceImpl implements OTPService {
           new PhoneNumber("+"+phone),
           new PhoneNumber(myTwilioPhoneNumber),
           "Kode OTP: "+otp.getCode()).create();
-      create(otp);
+      insert(otp);
       return "success";
     } catch (ApiException e) {
       //twilio free can only send to verified number

@@ -15,14 +15,14 @@ import java.util.ArrayList;
 public class JwtUserDetailsService implements UserDetailsService {
 
   @Autowired
-  UserService userService;
+  private UserService userService;
 
   @Autowired
   private PasswordEncoder bcryptEncoder;
 
   @Override
   public UserDetails loadUserByUsername(String s) {
-    User user = userService.getUserByEmailOrPhone(s);
+    User user = userService.getByEmailOrPhone(s);
     if (user == null) {
       throw new UsernameNotFoundException("User not found with email or phone: " + s);
     }

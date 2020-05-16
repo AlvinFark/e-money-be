@@ -5,11 +5,11 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.IOException;
 
 public class FTPBuilder {
 
-    FTPClient ftp;
+    final FTPClient ftp;
 
     public FTPBuilder(String host, String user, String pwd) throws Exception {
         ftp = new FTPClient();

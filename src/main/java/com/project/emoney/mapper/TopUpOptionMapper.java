@@ -13,10 +13,10 @@ import java.util.List;
 public interface TopUpOptionMapper {
 
     @Select("SELECT * FROM topupoption")
-    List<TopUpOption> getAllTopUpOption();
+    List<TopUpOption> getAll();
 
     @Insert("INSERT INTO topupoption (value, fee) VALUES (#{value}, #{fee})")
-    void createTopUpOption(TopUpOption topUpOption);
+    void insert(TopUpOption topUpOption);
 
     @Select("SELECT * FROM topupoption WHERE id = #{id}")
     TopUpOption getById(long id);
