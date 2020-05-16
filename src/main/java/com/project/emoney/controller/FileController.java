@@ -29,6 +29,10 @@ public class FileController {
   public ResponseEntity<?> uploadBukti(@CurrentUser org.springframework.security.core.userdetails.User userDetails,
                                        @PathVariable long idTransaction,
                                        @RequestParam("file") MultipartFile file) {
+    if (file.isEmpty()){
+      return new ResponseEntity<>(new SimpleResponseWrapper(400, "no file uploaded"), HttpStatus.BAD_REQUEST);
+    }
+
     //get user and transaction details
     User user = userService.getByEmail(userDetails.getUsername());
 
