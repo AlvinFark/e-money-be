@@ -90,15 +90,19 @@ public class TransactionWorker {
     List<TransactionDTO> transactionList = new ArrayList<TransactionDTO>();
 
     for (Transaction transaction: list) {
-      LocalDateTime expiredTime = transaction.getExpiry();
-      LocalDateTime localDateTime = LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_APP_HOURS);
-      int compareValue = expiredTime.compareTo(localDateTime);
-      if(compareValue > 0) {
-        //Add to list in-progress
-        transactionList.add(new TransactionDTO(transaction));
+      if (transaction.getStatus()==Status.IN_PROGRESS) {
+        LocalDateTime expiredTime = transaction.getExpiry();
+        LocalDateTime localDateTime = LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_APP_HOURS);
+        int compareValue = expiredTime.compareTo(localDateTime);
+        if (compareValue > 0) {
+          //Add to list in-progress
+          transactionList.add(new TransactionDTO(transaction));
+        } else {
+          //Move from in-progress
+          transactionService.updateStatusById(transaction.getId(), Status.FAILED);
+        }
       } else {
-        //Move from in-progress
-        transactionService.updateStatusById(transaction.getId(), Status.FAILED);
+        transactionList.add(new TransactionDTO(transaction));
       }
     }
 
@@ -135,7 +139,7 @@ public class TransactionWorker {
           transactionService.updateStatusById(transaction.getId(), Status.FAILED);
           transactionList.add(new TransactionDTO(transaction));
         }
-      } else {
+      } else if (transaction.getStatus()!=Status.VERIFYING){
         //if not in progress, add to list
         transactionList.add(new TransactionDTO(transaction));
       }
