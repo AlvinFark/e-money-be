@@ -37,7 +37,6 @@ public class UserWorker {
       userService.updatePassword(request);
       return "success";
     } catch (Exception e) {
-      e.printStackTrace();
       return "failed";
     }
   }
