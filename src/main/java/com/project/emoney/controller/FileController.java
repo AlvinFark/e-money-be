@@ -6,6 +6,7 @@ import com.project.emoney.entity.TransactionMethod;
 import com.project.emoney.entity.User;
 import com.project.emoney.payload.response.SimpleResponseWrapper;
 import com.project.emoney.security.CurrentUser;
+import com.project.emoney.service.AsyncAdapterService;
 import com.project.emoney.service.TransactionService;
 import com.project.emoney.service.UserService;
 import com.project.emoney.utils.FTPBuilder;
@@ -14,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api")
@@ -24,6 +27,9 @@ public class FileController {
 
   @Autowired
   private TransactionService transactionService;
+
+  @Autowired
+  private AsyncAdapterService asyncAdapterService;
 
   @PostMapping("/transaction/upload/{idTransaction}")
   public ResponseEntity<?> uploadBukti(@CurrentUser org.springframework.security.core.userdetails.User userDetails,
@@ -59,8 +65,9 @@ public class FileController {
           ftp.deleteFile("/bukti-transfer/" + idTransaction + "." + transaction.getImagePath());
         }
         //upload file and save extension to db
-        ftp.uploadFile(file, idTransaction + "." + extension, "/bukti-transfer/");
-        transactionService.setExtensionById(idTransaction, extension);
+        CompletableFuture<Void> completableFtp = asyncAdapterService.ftpUploadFile(ftp, file, idTransaction + "." + extension, "/bukti-transfer/");
+        CompletableFuture<Void> completableTransaction = asyncAdapterService.setTransactionStatusAndExtension(idTransaction, extension, Status.VERIFYING);
+        CompletableFuture.allOf(completableFtp,completableTransaction);
       } catch (Exception e) {
         //response if ftp server inactive
         e.printStackTrace();

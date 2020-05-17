@@ -46,8 +46,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void setExtensionById(long id, String extension) {
-        transactionMapper.setExtensionById(id, extension);
+    public void setExtensionAndStatusById(long id, String extension, Status status) {
+        transactionMapper.setExtensionById(id, extension, status);
     }
 
     @Override
