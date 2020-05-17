@@ -40,7 +40,7 @@ public class UserController {
   @PutMapping("/password")
   public ResponseEntity<?> updatePassword(@CurrentUser org.springframework.security.core.userdetails.User userDetails, @RequestBody User request) throws Exception {
     if (!validation.password(request.getPassword())){
-      return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad credentials"), HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(new SimpleResponseWrapper(400, "invalid credentials"), HttpStatus.BAD_REQUEST);
     }
 //    RPCClient rpcClient = new RPCClient("password");
     request.setEmail(userDetails.getUsername());

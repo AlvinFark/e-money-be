@@ -1,5 +1,7 @@
 package com.project.emoney.controller;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.emoney.entity.User;
 import com.project.emoney.payload.dto.UserWithToken;
@@ -94,16 +96,22 @@ public class AuthController {
     String responseMQ = authWorker.login(objectMapper.writeValueAsString(loginRequest));
 
     //translate MQ response
-    switch (responseMQ) {
-      case "bad credentials":
-        return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
-      case "inactive account, otp sent":
-        return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
-      case "unverified number, can't send otp":
-        return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ+", use email verification or master key"), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
-      default:
-        UserWithToken userWithToken = objectMapper.readValue(responseMQ, UserWithToken.class);
-        return new ResponseEntity<>(new ResponseWrapper(202, "accepted", userWithToken), HttpStatus.ACCEPTED);
+    try {
+      UserWithToken userWithToken = objectMapper.readValue(responseMQ, UserWithToken.class);
+      return new ResponseEntity<>(new ResponseWrapper(202, "accepted", userWithToken), HttpStatus.ACCEPTED);
+    } catch (JsonProcessingException e) {
+      switch (responseMQ) {
+        case "email or phone not registered":
+          return new ResponseEntity<>(new SimpleResponseWrapper(404, responseMQ), HttpStatus.NOT_FOUND);
+        case "wrong password":
+          return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
+        case "inactive account, otp sent":
+          return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
+        case "unverified number, can't send otp":
+          return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ+", use email verification or master key"), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
+        default:
+          return new ResponseEntity<>(new SimpleResponseWrapper(500, "internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
   }
 }
