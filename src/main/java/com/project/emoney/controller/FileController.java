@@ -51,7 +51,7 @@ public class FileController {
       }
 
       //can only upload for bank transfer method
-      if (transaction.getStatus() != Status.IN_PROGRESS || transaction.getMethod() != TransactionMethod.BANK) {
+      if ((transaction.getStatus()!=Status.IN_PROGRESS&&transaction.getStatus()!=Status.VERIFYING) || transaction.getMethod() != TransactionMethod.BANK) {
         return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad transaction method or status"), HttpStatus.BAD_REQUEST);
       }
 
