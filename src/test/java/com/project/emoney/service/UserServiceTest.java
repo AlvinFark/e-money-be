@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.mockito.Mockito.*;
 
-;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
