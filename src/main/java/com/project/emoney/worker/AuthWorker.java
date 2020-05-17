@@ -53,8 +53,8 @@ public class AuthWorker {
     User user;
     //save user
     user = userService.insert(userRequest);
-    CompletableFuture<String> statusOtp = asyncAdapterService.sendEmail(user);
-    CompletableFuture<String> statusEmail = asyncAdapterService.sendOtp(user.getPhone());
+    CompletableFuture<String> statusEmail = asyncAdapterService.sendEmail(user);
+    CompletableFuture<String> statusOtp = asyncAdapterService.sendOtp(user.getPhone());
     CompletableFuture.allOf(statusOtp,statusEmail).join();
     if (statusOtp.get().equals("success")&&statusEmail.get().equals("success")){
       return "created, check email or sms for activation";

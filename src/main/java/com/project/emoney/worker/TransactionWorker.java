@@ -51,30 +51,30 @@ public class TransactionWorker {
       return "top up option not found";
     }
     if (transactionRequest.getMethod()==TransactionMethod.WALLET){
-      //check balance
+      //chek balance
       if (user.getBalance()<=0||user.getBalance()<topUpOption.getValue()+topUpOption.getFee()){
         return "not enough balance";
       }
-    }
-    //send request to dummy server
-    TopUpRequest topUpRequest = new TopUpRequest(transactionRequest.getCardNumber(),topUpOption.getValue());
-    RequestBody body = RequestBody.create(objectMapper.writeValueAsString(topUpRequest), JSON);
-    Request request = new Request.Builder()
-        .url("https://dummy-emoney.herokuapp.com/api/card/top-up")
-        .post(body)
-        .build();
-    try (Response response = httpClient.newCall(request).execute()) {
-      if (!response.isSuccessful()) {
-        return response.message();
-      } else if (transactionRequest.getMethod()==TransactionMethod.WALLET){
-        user.setBalance(user.getBalance()-topUpOption.getValue()-topUpOption.getFee());
-        CompletableFuture<Void> voidCompletableFutureUser = asyncAdapterService.updateUserBalance(user);
-        CompletableFuture<Void> voidCompletableFutureTransaction = asyncAdapterService.saveTransaction(transactionRequest, user, topUpOption, Status.COMPLETED);
-        CompletableFuture.allOf(voidCompletableFutureTransaction,voidCompletableFutureUser);
-        return objectMapper.writeValueAsString(user);
+      //send request to dummy server
+      TopUpRequest topUpRequest = new TopUpRequest(transactionRequest.getCardNumber(),topUpOption.getValue());
+      RequestBody body = RequestBody.create(objectMapper.writeValueAsString(topUpRequest), JSON);
+      Request request = new Request.Builder()
+          .url("https://dummy-emoney.herokuapp.com/api/card/top-up")
+          .post(body)
+          .build();
+      try (Response response = httpClient.newCall(request).execute()) {
+        if (!response.isSuccessful()) {
+          return response.message();
+        } else {
+          user.setBalance(user.getBalance()-topUpOption.getValue()-topUpOption.getFee());
+          CompletableFuture<Void> voidCompletableFutureUser = asyncAdapterService.updateUserBalance(user);
+          CompletableFuture<Void> voidCompletableFutureTransaction = asyncAdapterService.saveTransaction(transactionRequest, user, topUpOption, Status.COMPLETED);
+          CompletableFuture.allOf(voidCompletableFutureTransaction,voidCompletableFutureUser);
+          return objectMapper.writeValueAsString(user);
+        }
+      } catch (Exception e) {
+        return "can't reach 3rd party server, try again";
       }
-    } catch (Exception e) {
-      return "can't reach 3rd party server, try again";
     }
     transactionService.insertByTransactionRequestAndUserAndTopUpOptionAndStatus(transactionRequest, user, topUpOption, Status.IN_PROGRESS);
     return "success";
