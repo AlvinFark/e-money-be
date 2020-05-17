@@ -29,5 +29,8 @@ public class EmoneyApplication implements CommandLineRunner {
     worker.run("password");
     worker.run("cancelTransaction");
     worker.run("transaction");
+    worker.run("topupoption");
+    worker.run("merchant");
+    worker.run("confirmpayment");
   }
 }
