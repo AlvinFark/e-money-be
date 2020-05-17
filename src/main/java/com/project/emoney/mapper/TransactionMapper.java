@@ -30,6 +30,6 @@ public interface TransactionMapper {
     @Update("UPDATE transaction SET status = #{status} WHERE id = #{id}")
     void setStatusById(long id, Status status);
 
-    @Update("UPDATE transaction SET imagePath = #{extension} WHERE id = #{id}")
-    void setExtensionById(long id, String extension);
+    @Update("UPDATE transaction SET imagePath = #{extension}, status = #{status} WHERE id = #{id}")
+    void setExtensionById(long id, String extension, Status status);
 }
