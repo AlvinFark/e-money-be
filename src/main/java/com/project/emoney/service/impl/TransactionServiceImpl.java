@@ -36,6 +36,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public List<Transaction> getInProgressAndMerchantByUserId(long id) {
+        return transactionMapper.getInProgressAndMerchantByUserId(id);
+    }
+
+    @Override
     public void insert(Transaction transaction) {
         transactionMapper.insert(transaction);
     }
@@ -46,8 +51,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void setExtensionById(long id, String extension) {
-        transactionMapper.setExtensionById(id, extension);
+    public void setExtensionAndStatusById(long id, String extension, Status status) {
+        transactionMapper.setExtensionById(id, extension, status);
     }
 
     @Override

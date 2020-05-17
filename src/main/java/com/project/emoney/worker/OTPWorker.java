@@ -73,7 +73,7 @@ public class OTPWorker {
       //return dan set active
       userService.setActiveByEmail(user.getEmail());
       return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
-    } catch (UsernameNotFoundException | InterruptedException | ExecutionException e) {
+    } catch (Exception e) {
       return "user not found";
     }
   }

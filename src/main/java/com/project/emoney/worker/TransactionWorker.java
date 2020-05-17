@@ -90,21 +90,25 @@ public class TransactionWorker {
     List<TransactionDTO> transactionList = new ArrayList<TransactionDTO>();
 
     for (Transaction transaction: list) {
-      LocalDateTime expiredTime = transaction.getExpiry();
-      LocalDateTime localDateTime = LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_APP_HOURS);
-      int compareValue = expiredTime.compareTo(localDateTime);
-      if(compareValue > 0) {
-        //Add to list in-progress
-        transactionList.add(new TransactionDTO(transaction));
+      if (transaction.getStatus()==Status.IN_PROGRESS) {
+        LocalDateTime expiredTime = transaction.getExpiry();
+        LocalDateTime localDateTime = LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_APP_HOURS);
+        int compareValue = expiredTime.compareTo(localDateTime);
+        if (compareValue > 0) {
+          //Add to list in-progress
+          transactionList.add(new TransactionDTO(transaction));
+        } else {
+          //Move from in-progress
+          transactionService.updateStatusById(transaction.getId(), Status.FAILED);
+        }
       } else {
-        //Move from in-progress
-        transactionService.updateStatusById(transaction.getId(), Status.FAILED);
+        transactionList.add(new TransactionDTO(transaction));
       }
     }
 
     int start = (historyRequest.getPage()-1)*10;
     if (start>=transactionList.size()){
-      return "not found";
+      return objectMapper.writeValueAsString(new ArrayList<TransactionDTO>());
     }
     int end = start + 10;
     if (end>transactionList.size()){
@@ -135,7 +139,7 @@ public class TransactionWorker {
           transactionService.updateStatusById(transaction.getId(), Status.FAILED);
           transactionList.add(new TransactionDTO(transaction));
         }
-      } else {
+      } else if (transaction.getStatus()!=Status.VERIFYING){
         //if not in progress, add to list
         transactionList.add(new TransactionDTO(transaction));
       }
@@ -143,7 +147,7 @@ public class TransactionWorker {
 
     int start = (historyRequest.getPage()-1)*10;
     if (start>=transactionList.size()){
-      return "not found";
+      return objectMapper.writeValueAsString(new ArrayList<TransactionDTO>());
     }
     int end = start + 10;
     if (end>transactionList.size()){
@@ -165,7 +169,7 @@ public class TransactionWorker {
       }
 
       //can only cancel in progress transaction
-      if (transaction.getStatus() != Status.IN_PROGRESS) {
+      if (transaction.getStatus()!=Status.IN_PROGRESS&&transaction.getStatus()!=Status.VERIFYING) {
         return "can't cancel completed transaction";
       }
 

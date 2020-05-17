@@ -53,8 +53,8 @@ public class AuthWorker {
     User user;
     //save user
     user = userService.insert(userRequest);
-    CompletableFuture<String> statusOtp = asyncAdapterService.sendEmail(user);
-    CompletableFuture<String> statusEmail = asyncAdapterService.sendOtp(user.getPhone());
+    CompletableFuture<String> statusEmail = asyncAdapterService.sendEmail(user);
+    CompletableFuture<String> statusOtp = asyncAdapterService.sendOtp(user.getPhone());
     CompletableFuture.allOf(statusOtp,statusEmail).join();
     if (statusOtp.get().equals("success")&&statusEmail.get().equals("success")){
       return "created, check email or sms for activation";
@@ -70,14 +70,17 @@ public class AuthWorker {
   public String login(String message) throws JsonProcessingException {
     LoginRequest loginRequest = objectMapper.readValue(message, LoginRequest.class);
     log.info("[login]  Receive login request for email or phone: " + loginRequest.getEmailOrPhone());
+    User user = userService.getByEmailOrPhone(loginRequest.getEmailOrPhone());
+    if (user==null){
+      return "email or phone not registered";
+    }
     try {
       //check user credentials
       authenticate(loginRequest.getEmailOrPhone(), loginRequest.getPassword());
     } catch (BadCredentialsException e) {
-      return "bad credentials";
+      return "wrong password";
     }
     final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmailOrPhone());
-    User user = userService.getByEmail(userDetails.getUsername());
     //if already active, then return token
     if (user.isActive()) {
       return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
