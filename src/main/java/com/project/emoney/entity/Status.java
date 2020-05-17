@@ -4,5 +4,6 @@ public enum Status {
   IN_PROGRESS,
   COMPLETED,
   CANCELLED,
-  FAILED
+  FAILED,
+  VERIFYING
 }
