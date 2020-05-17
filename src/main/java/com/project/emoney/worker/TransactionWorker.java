@@ -169,7 +169,7 @@ public class TransactionWorker {
       }
 
       //can only cancel in progress transaction
-      if (transaction.getStatus() != Status.IN_PROGRESS) {
+      if (transaction.getStatus()!=Status.IN_PROGRESS&&transaction.getStatus()!=Status.VERIFYING) {
         return "can't cancel completed transaction";
       }
 
