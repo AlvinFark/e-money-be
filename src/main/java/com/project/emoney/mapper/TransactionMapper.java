@@ -17,6 +17,9 @@ public interface TransactionMapper {
     @Select("SELECT * FROM transaction WHERE userId = #{userId} AND (status = 'IN_PROGRESS' OR status = 'VERIFYING') ORDER BY time DESC")
     List<Transaction> getInProgressByUserId(long userId);
 
+    @Select("SELECT * FROM transaction WHERE userId = #{userId} AND status = 'IN_PROGRESS' AND method = 'MERCHANT' ORDER BY time DESC")
+    List<Transaction> getInProgressAndMerchantByUserId(long userId);
+
     @Select("SELECT * FROM transaction WHERE userId = #{userId} ORDER BY time DESC")
     List<Transaction> getAllByUserId(long userId);
 

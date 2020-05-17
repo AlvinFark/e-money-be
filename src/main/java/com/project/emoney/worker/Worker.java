@@ -30,6 +30,9 @@ public class Worker {
   @Autowired
   private TopUpOptionWorker topUpOptionWorker;
 
+  @Autowired
+  private PaymentWorker paymentWorker;
+
   private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   @Async("workerExecutor")
@@ -94,6 +97,12 @@ public class Worker {
               break;
             case "topupoption":
               response = topUpOptionWorker.getList();
+              break;
+            case "merchant":
+              response = paymentWorker.getMerchantTransaction(message);
+              break;
+            case "confirmpayment":
+              response = paymentWorker.confirm(message);
               break;
           }
         } catch (Exception e) {

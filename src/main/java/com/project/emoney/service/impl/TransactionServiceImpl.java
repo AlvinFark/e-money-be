@@ -36,6 +36,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public List<Transaction> getInProgressAndMerchantByUserId(long id) {
+        return transactionMapper.getInProgressAndMerchantByUserId(id);
+    }
+
+    @Override
     public void insert(Transaction transaction) {
         transactionMapper.insert(transaction);
     }
