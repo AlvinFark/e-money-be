@@ -5,12 +5,14 @@ import com.project.emoney.entity.TopUpOption;
 import com.project.emoney.entity.User;
 import com.project.emoney.payload.request.TransactionRequest;
 import com.project.emoney.security.JwtUserDetailsService;
+import com.project.emoney.utils.FTPBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -99,6 +101,22 @@ public class AsyncAdapterService {
     log.info("updating user balance started");
     userService.updateBalance(userRequest);
     log.info("updating user balance success");
+    return CompletableFuture.completedFuture(null);
+  }
+
+  @Async("asyncExecutor")
+  public CompletableFuture<Void> ftpUploadFile(FTPBuilder ftp, MultipartFile file, String fileName, String hostDir) throws Exception {
+    log.info("uploading file started");
+    ftp.uploadFile(file, fileName, hostDir);
+    log.info("uploading file success");
+    return CompletableFuture.completedFuture(null);
+  }
+
+  @Async("asyncExecutor")
+  public CompletableFuture<Void> setTransactionStatusAndExtension(long id, String extension, Status status){
+    log.info("updating transaction started");
+    transactionService.setExtensionAndStatusById(id, extension, status);
+    log.info("updating transaction success");
     return CompletableFuture.completedFuture(null);
   }
 }
