@@ -55,9 +55,9 @@ public class FileController {
         return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad transaction method or status"), HttpStatus.BAD_REQUEST);
       }
 
+      //get extension from file to be saved on db
+      String extension = file.getOriginalFilename().split("\\.")[file.getOriginalFilename().split("\\.").length - 1];
       try {
-        //get extension from file to be saved on db
-        String extension = file.getOriginalFilename().split("\\.")[file.getOriginalFilename().split("\\.").length - 1];
         //init ftp connection
         FTPBuilder ftp = new FTPBuilder("ftp.drivehq.com","alvark", "WiUgm@Cq436AG5i");
         //check whether user already upload a file for this transaction, delete it before if yes
@@ -70,7 +70,6 @@ public class FileController {
         CompletableFuture.allOf(completableFtp,completableTransaction);
       } catch (Exception e) {
         //response if ftp server inactive
-        e.printStackTrace();
         return new ResponseEntity<>(new SimpleResponseWrapper(503, "can't connect to FTP server"), HttpStatus.SERVICE_UNAVAILABLE);
       }
       //return success

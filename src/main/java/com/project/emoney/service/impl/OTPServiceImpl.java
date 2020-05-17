@@ -56,7 +56,6 @@ public class OTPServiceImpl implements OTPService {
       return "success";
     } catch (ApiException e) {
       //twilio free can only send to verified number
-      e.printStackTrace();
       return "failed";
     }
   }
