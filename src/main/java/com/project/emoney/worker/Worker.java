@@ -27,6 +27,9 @@ public class Worker {
   @Autowired
   private EmailTokenWorker emailTokenWorker;
 
+  @Autowired
+  private TopUpOptionWorker topUpOptionWorker;
+
   private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);
 
   @Async("workerExecutor")
@@ -88,6 +91,9 @@ public class Worker {
               break;
             case "transaction":
               response = transactionWorker.createTransaction(message);
+              break;
+            case "topupoption":
+              response = topUpOptionWorker.getList();
               break;
           }
         } catch (Exception e) {
