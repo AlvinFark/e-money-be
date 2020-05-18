@@ -5,8 +5,10 @@ import com.project.emoney.mapper.OTPMapper;
 import com.project.emoney.service.OTPService;
 import com.project.emoney.utils.Generator;
 import com.project.emoney.utils.GlobalVariable;
+import com.project.emoney.utils.TwilioSMS;
 import com.twilio.Twilio;
 import com.twilio.exception.ApiException;
+import com.twilio.exception.AuthenticationException;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,14 +49,11 @@ public class OTPServiceImpl implements OTPService {
       otp.setCode(generator.generateOtp());
       //add 7 hours to calibrate it with server
       otp.setTime(LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_DB_HOURS));
-      Twilio.init(twilioAccountSid, twilioAuthToken);
-      Message.creator(
-          new PhoneNumber("+"+phone),
-          new PhoneNumber(myTwilioPhoneNumber),
-          "Kode OTP: "+otp.getCode()).create();
+      TwilioSMS twilioSMS = new TwilioSMS();
+      twilioSMS.send(myTwilioPhoneNumber, twilioAccountSid, twilioAuthToken, phone, otp.getCode());
       insert(otp);
       return "success";
-    } catch (ApiException e) {
+    } catch (ApiException | AuthenticationException e) {
       //twilio free can only send to verified number
       return "failed";
     }

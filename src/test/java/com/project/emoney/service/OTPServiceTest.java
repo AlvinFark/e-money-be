@@ -3,11 +3,15 @@ package com.project.emoney.service;
 import com.project.emoney.entity.*;
 import com.project.emoney.mapper.OTPMapper;
 import com.project.emoney.service.impl.OTPServiceImpl;
+import com.project.emoney.utils.Generator;
+import com.project.emoney.utils.TwilioSMS;
+import com.twilio.exception.ApiException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
@@ -25,6 +29,12 @@ public class OTPServiceTest {
 
     @Mock
     private OTPMapper otpMapper;
+
+    @Mock
+    private Generator generator;
+
+    @Mock
+    private final TwilioSMS twilioSMS = new TwilioSMS();
 
     @InjectMocks
     private OTPServiceImpl otpService;
@@ -51,5 +61,11 @@ public class OTPServiceTest {
         final OTP otp = getOTP();
         otpService.insert(otp);
         verify(otpMapper, times(1)).insert(otp);
+    }
+
+    @Test
+    public void failedOTPSendTest() {
+        final String phone = "6288888888";
+        assert otpService.sendOtp(phone).equals("failed");
     }
 }
