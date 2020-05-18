@@ -48,7 +48,7 @@ public class EmailTokenServiceTest {
   }
 
   public EmailToken getEmailToken() {
-    return new EmailToken(0,1,"JYFA87AJFS8AFK2JD0A2", LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_APP_HOURS));
+    return new EmailToken(0,1,"JYFA87AJFS8AFK2JD0A2", LocalDateTime.now().plusHours(GlobalVariable.TIME_DIFF_DB_HOURS));
   }
 
   @Test
