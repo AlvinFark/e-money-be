@@ -54,11 +54,11 @@ public class OTPWorker {
       final UserDetails userDetails = userDetailsCompletableFuture.get();
       CompletableFuture.allOf(userCompletableFuture,userDetailsCompletableFuture);
       //check master key, master key requested by FE QA for automation
-      if (otpRequest.getCode().equals("6666")) {
-        //set active
-        userService.setActiveByEmail(user.getEmail());
-        return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
-      }
+//      if (otpRequest.getCode().equals("6666")) {
+//        //set active
+//        userService.setActiveByEmail(user.getEmail());
+//        return objectMapper.writeValueAsString(new UserWithToken(user, jwtTokenUtil.generateToken(userDetails)));
+//      }
       //check whether otp didn't exist on db (get the latest if duplicate) and whether exist but not for this user
       OTP otp = otpService.getByCodeOrderByTimeDesc(otpRequest.getCode());
       if (otp == null || (!otp.getEmailOrPhone().equals(user.getEmail())&&!otp.getEmailOrPhone().equals(user.getPhone()))) {
