@@ -54,7 +54,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       if (!request.getRequestURI().equals("/api/login")&&!request.getRequestURI().equals("/api/register")&&
           !request.getRequestURI().equals("/api/otp")&&!request.getRequestURI().equals("/api/login/")&&
           !request.getRequestURI().equals("/api/register/")&&!request.getRequestURI().equals("/api/otp/")&&
-          !request.getRequestURI().startsWith("/api/verify")){
+          !request.getRequestURI().startsWith("/api/verify")&&!request.getRequestURI().startsWith("/api/payment")){
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponseWrapper(HttpStatus.UNAUTHORIZED.value(),"no token")));
       }

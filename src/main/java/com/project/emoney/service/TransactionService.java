@@ -12,6 +12,7 @@ public interface TransactionService {
     Transaction getById(long id);
     List<Transaction> getInProgressByUserId(long id);
     List<Transaction> getAllByUserId(long id);
+    List<Transaction> getInProgressAndMerchantByUserId(long id);
 
     void insert(Transaction transaction);
     void updateStatusById(long id, Status status);
