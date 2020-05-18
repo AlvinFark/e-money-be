@@ -40,11 +40,6 @@ public class UserController {
     RPCClient rpcClient = new RPCClient("password");
     request.setEmail(userDetails.getUsername());
     String responseMQ = rpcClient.call(objectMapper.writeValueAsString(request));
-    if (responseMQ.equals("success")){
-      return new ResponseEntity<>(new SimpleResponseWrapper(200, responseMQ), HttpStatus.OK);
-    } else {
-      return new ResponseEntity<>(new SimpleResponseWrapper(500, responseMQ), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return new ResponseEntity<>(new SimpleResponseWrapper(200, responseMQ), HttpStatus.OK);
   }
-
 }
