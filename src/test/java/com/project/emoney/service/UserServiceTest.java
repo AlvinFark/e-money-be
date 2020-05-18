@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.mockito.Mockito.*;
 
-;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -59,7 +58,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void insertTest() {
+  public void insertUserTest() {
     final User user = getUser();
     userService.insert(user);
     verify(userMapper, times(1)).insert(user);

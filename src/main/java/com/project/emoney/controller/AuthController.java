@@ -101,7 +101,7 @@ public class AuthController {
           return new ResponseEntity<>(new SimpleResponseWrapper(400, responseMQ), HttpStatus.BAD_REQUEST);
         case "inactive account, otp sent":
           return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
-        case "unverified number, can't send otp":
+        case "inactive account unverified number, can't send otp":
           return new ResponseEntity<>(new SimpleResponseWrapper(203, responseMQ+", use email verification or master key"), HttpStatus.NON_AUTHORITATIVE_INFORMATION);
         default:
           return new ResponseEntity<>(new SimpleResponseWrapper(500, "internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);

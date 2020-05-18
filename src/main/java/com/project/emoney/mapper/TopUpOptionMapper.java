@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface TopUpOptionMapper {
 
-    @Select("SELECT * FROM topupoption")
+    @Select("SELECT * FROM topupoption ORDER BY value")
     List<TopUpOption> getAll();
 
     @Insert("INSERT INTO topupoption (value, fee) VALUES (#{value}, #{fee})")
