@@ -58,7 +58,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void insertTest() {
+  public void insertUserTest() {
     final User user = getUser();
     userService.insert(user);
     verify(userMapper, times(1)).insert(user);
