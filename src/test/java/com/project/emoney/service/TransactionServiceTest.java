@@ -82,6 +82,16 @@ public class TransactionServiceTest {
     }
 
     @Test
+    public void getInProgressAndMerchantByUserId() {
+        List<Transaction> expected = new ArrayList<Transaction>();
+        expected.add(getTransaction());
+        when(transactionMapper.getInProgressAndMerchantByUserId(USER_ID)).thenReturn(expected);
+
+        final List<Transaction> transactionList = transactionService.getInProgressAndMerchantByUserId(USER_ID);
+        assert transactionList.equals(expected);
+    }
+
+    @Test
     public void getListInProgressByUserIdTest() {
         final List<Transaction> expected = new ArrayList<Transaction>();
         when(transactionMapper.getInProgressByUserId(USER_ID)).thenReturn(expected);

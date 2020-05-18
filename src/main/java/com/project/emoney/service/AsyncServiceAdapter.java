@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.concurrent.CompletableFuture;
 
 @Service
-public class AsyncAdapterService {
+public class AsyncServiceAdapter {
 
   @Autowired
   private OTPService otpService;
@@ -37,7 +37,7 @@ public class AsyncAdapterService {
   @Autowired
   private TransactionService transactionService;
 
-  private static final Logger log = LoggerFactory.getLogger(AsyncAdapterService.class);
+  private static final Logger log = LoggerFactory.getLogger(AsyncServiceAdapter.class);
 
   @Async("asyncExecutor")
   public CompletableFuture<String> sendEmail(User user) {

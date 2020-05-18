@@ -6,6 +6,7 @@ import com.project.emoney.mapper.EmailTokenMapper;
 import com.project.emoney.service.EmailTokenService;
 import com.project.emoney.utils.Generator;
 import com.project.emoney.utils.GlobalVariable;
+import com.project.emoney.utils.GmailSMTP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -25,7 +26,7 @@ public class EmailTokenServiceImpl implements EmailTokenService {
   private Generator generator;
 
   @Autowired
-  private JavaMailSender javaMailSender;
+  private GmailSMTP gmailSMTP;
 
   @Override
   public void insertByUserAndToken(User user, String token) {
@@ -43,14 +44,7 @@ public class EmailTokenServiceImpl implements EmailTokenService {
     try {
       String token = generator.generateToken();
       insertByUserAndToken(user,token);
-      MimeMessage message = javaMailSender.createMimeMessage();
-      MimeMessageHelper helper = new MimeMessageHelper(message, true);
-      helper.setSubject("Please confirm your new e-Money App account");
-      helper.setTo(user.getEmail());
-      helper.setText("<a href=\""+ GlobalVariable.HOST +"/api/verify/"+token+"\">Please click here to activate your account</a> " +
-          "or open this link in your browser if the link didn't work: " +GlobalVariable.HOST+"/api/verify/"+token, true);
-
-      javaMailSender.send(message);
+      gmailSMTP.send(user.getEmail(),token);
       return "success";
     } catch (MessagingException e) {
       return "failed";
