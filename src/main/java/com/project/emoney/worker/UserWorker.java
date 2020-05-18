@@ -33,11 +33,7 @@ public class UserWorker {
   public String password(String message) throws JsonProcessingException {
     User request = objectMapper.readValue(message, User.class);
     request.setPassword(passwordEncoder.encode(request.getPassword()));
-    try {
-      userService.updatePassword(request);
-      return "success";
-    } catch (Exception e) {
-      return "failed";
-    }
+    userService.updatePassword(request);
+    return "success";
   }
 }
