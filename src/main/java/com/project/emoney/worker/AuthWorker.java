@@ -7,7 +7,7 @@ import com.project.emoney.payload.dto.UserWithToken;
 import com.project.emoney.payload.request.LoginRequest;
 import com.project.emoney.security.JwtTokenUtil;
 import com.project.emoney.security.JwtUserDetailsService;
-import com.project.emoney.service.AsyncAdapterService;
+import com.project.emoney.service.AsyncServiceAdapter;
 import com.project.emoney.service.OTPService;
 import com.project.emoney.service.UserService;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class AuthWorker {
   private JwtTokenUtil jwtTokenUtil;
 
   @Autowired
-  private AsyncAdapterService asyncAdapterService;
+  private AsyncServiceAdapter asyncServiceAdapter;
 
   @Autowired
   private OTPService otpService;
@@ -53,8 +53,8 @@ public class AuthWorker {
     User user;
     //save user
     user = userService.insert(userRequest);
-    CompletableFuture<String> statusEmail = asyncAdapterService.sendEmail(user);
-    CompletableFuture<String> statusOtp = asyncAdapterService.sendOtp(user.getPhone());
+    CompletableFuture<String> statusEmail = asyncServiceAdapter.sendEmail(user);
+    CompletableFuture<String> statusOtp = asyncServiceAdapter.sendOtp(user.getPhone());
     CompletableFuture.allOf(statusOtp,statusEmail).join();
     if (statusOtp.get().equals("success")&&statusEmail.get().equals("success")){
       return "created, check email or sms for activation";

@@ -7,7 +7,7 @@ import com.project.emoney.entity.User;
 import com.project.emoney.payload.dto.UserWithToken;
 import com.project.emoney.payload.request.OTPRequest;
 import com.project.emoney.security.JwtTokenUtil;
-import com.project.emoney.service.AsyncAdapterService;
+import com.project.emoney.service.AsyncServiceAdapter;
 import com.project.emoney.service.OTPService;
 import com.project.emoney.service.UserService;
 import com.project.emoney.utils.GlobalVariable;
@@ -15,12 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @Service
 public class OTPWorker {
@@ -35,7 +33,7 @@ public class OTPWorker {
   private JwtTokenUtil jwtTokenUtil;
 
   @Autowired
-  private AsyncAdapterService asyncAdapterService;
+  private AsyncServiceAdapter asyncServiceAdapter;
 
   final ObjectMapper objectMapper = new ObjectMapper();
   private static final Logger log = LoggerFactory.getLogger(AuthWorker.class);
@@ -46,8 +44,8 @@ public class OTPWorker {
 
     try {
       //get user details
-      CompletableFuture<User> userCompletableFuture = asyncAdapterService.getUserByEmailOrPhone(otpRequest.getEmailOrPhone());
-      CompletableFuture<UserDetails> userDetailsCompletableFuture = asyncAdapterService.loadUserDetailsByUsername(otpRequest.getEmailOrPhone());
+      CompletableFuture<User> userCompletableFuture = asyncServiceAdapter.getUserByEmailOrPhone(otpRequest.getEmailOrPhone());
+      CompletableFuture<UserDetails> userDetailsCompletableFuture = asyncServiceAdapter.loadUserDetailsByUsername(otpRequest.getEmailOrPhone());
       User user = userCompletableFuture.get();
       //if active reject request
       if (user.isActive()) {

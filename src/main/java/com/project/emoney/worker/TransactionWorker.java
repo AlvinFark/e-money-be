@@ -8,7 +8,7 @@ import com.project.emoney.payload.request.CancelRequest;
 import com.project.emoney.payload.request.HistoryRequest;
 import com.project.emoney.payload.request.TopUpRequest;
 import com.project.emoney.payload.request.TransactionRequest;
-import com.project.emoney.service.AsyncAdapterService;
+import com.project.emoney.service.AsyncServiceAdapter;
 import com.project.emoney.service.TransactionService;
 import com.project.emoney.service.UserService;
 import com.project.emoney.utils.GlobalVariable;
@@ -33,7 +33,7 @@ public class TransactionWorker {
   private TransactionService transactionService;
 
   @Autowired
-  private AsyncAdapterService asyncAdapterService;
+  private AsyncServiceAdapter asyncServiceAdapter;
 
   private final OkHttpClient httpClient = new OkHttpClient();
   public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -41,8 +41,8 @@ public class TransactionWorker {
   public String createTransaction(String message) throws Exception {
     //init objects
     TransactionRequest transactionRequest = objectMapper.readValue(message, TransactionRequest.class);
-    CompletableFuture<User> userCompletableFuture = asyncAdapterService.getUserByEmail(transactionRequest.getEmail());
-    CompletableFuture<TopUpOption> topUpOptionCompletableFuture = asyncAdapterService.getTopUpOptionById(transactionRequest.getIdTopUpOption());
+    CompletableFuture<User> userCompletableFuture = asyncServiceAdapter.getUserByEmail(transactionRequest.getEmail());
+    CompletableFuture<TopUpOption> topUpOptionCompletableFuture = asyncServiceAdapter.getTopUpOptionById(transactionRequest.getIdTopUpOption());
     User user = userCompletableFuture.get();
     TopUpOption topUpOption = topUpOptionCompletableFuture.get();
 
@@ -67,8 +67,8 @@ public class TransactionWorker {
           return response.message();
         } else {
           user.setBalance(user.getBalance()-topUpOption.getValue()-topUpOption.getFee());
-          CompletableFuture<Void> voidCompletableFutureUser = asyncAdapterService.updateUserBalance(user);
-          CompletableFuture<Void> voidCompletableFutureTransaction = asyncAdapterService.saveTransaction(transactionRequest, user, topUpOption, Status.COMPLETED);
+          CompletableFuture<Void> voidCompletableFutureUser = asyncServiceAdapter.updateUserBalance(user);
+          CompletableFuture<Void> voidCompletableFutureTransaction = asyncServiceAdapter.saveTransaction(transactionRequest, user, topUpOption, Status.COMPLETED);
           CompletableFuture.allOf(voidCompletableFutureTransaction,voidCompletableFutureUser);
           return objectMapper.writeValueAsString(user);
         }
