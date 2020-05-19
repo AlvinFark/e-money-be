@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -39,6 +40,13 @@ public class FileController {
       return new ResponseEntity<>(new SimpleResponseWrapper(400, "no file uploaded"), HttpStatus.BAD_REQUEST);
     }
 
+    //get extension from file to be saved on db and handling
+    String[] allowedExtension = {"jpg", "jpeg", "png", "pdf"};
+    String extension = file.getOriginalFilename().split("\\.")[file.getOriginalFilename().split("\\.").length - 1];
+    if (Arrays.stream(allowedExtension).noneMatch(extension.toLowerCase()::equals)){
+      return new ResponseEntity<>(new SimpleResponseWrapper(400, "unsupported file type"), HttpStatus.BAD_REQUEST);
+    }
+
     //get user and transaction details
     User user = userService.getByEmail(userDetails.getUsername());
 
@@ -55,8 +63,6 @@ public class FileController {
         return new ResponseEntity<>(new SimpleResponseWrapper(400, "bad transaction method or status"), HttpStatus.BAD_REQUEST);
       }
 
-      //get extension from file to be saved on db
-      String extension = file.getOriginalFilename().split("\\.")[file.getOriginalFilename().split("\\.").length - 1];
       try {
         //init ftp connection
         FTPBuilder ftp = new FTPBuilder("ftp.drivehq.com","alvark", "WiUgm@Cq436AG5i");
